@@ -4,7 +4,6 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain.SwerveDriveState
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.networktables.StructArrayPublisher
-import edu.wpi.first.networktables.StructPublisher
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 
@@ -21,7 +20,7 @@ class SwerveTelemetry {
         .getStructArrayTopic("desiredStates", SwerveModuleState.struct)
         .publish()
 
-    fun telemetrize(state: SwerveDriveState){
+    fun telemetrize(state: SwerveDriveState) {
         field.robotPose = state.Pose
 
         SmartDashboard.putData("swerve/Field", field)

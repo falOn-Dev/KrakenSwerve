@@ -33,13 +33,13 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
             null,
             Units.Volts.of(4.0),
             null,
-            { state -> SignalLogger.writeString("state", state.toString()) }
+            { state -> SignalLogger.writeString("state", state.toString()) },
         ),
         SysIdRoutine.Mechanism(
-            { volts: Measure<Voltage> -> setControl(rotationSysIDReq.withVolts(volts))},
+            { volts: Measure<Voltage> -> setControl(rotationSysIDReq.withVolts(volts)) },
             null,
-            this
-        )
+            this,
+        ),
     )
 
     private val steerSysIDRoutine: SysIdRoutine = SysIdRoutine(
@@ -47,13 +47,13 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
             null,
             Units.Volts.of(7.0),
             null,
-            { state -> SignalLogger.writeString("state", state.toString()) }
+            { state -> SignalLogger.writeString("state", state.toString()) },
         ),
         SysIdRoutine.Mechanism(
-            { volts: Measure<Voltage> -> setControl(steerSysIDReq.withVolts(volts))},
+            { volts: Measure<Voltage> -> setControl(steerSysIDReq.withVolts(volts)) },
             null,
-            this
-        )
+            this,
+        ),
     )
 
     private val translationSysIDRoutine: SysIdRoutine = SysIdRoutine(
@@ -61,22 +61,21 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
             null,
             Units.Volts.of(4.0),
             null,
-            { state -> SignalLogger.writeString("state", state.toString()) }
+            { state -> SignalLogger.writeString("state", state.toString()) },
         ),
         SysIdRoutine.Mechanism(
-            { volts: Measure<Voltage> -> setControl(translationSysIDReq.withVolts(volts))},
+            { volts: Measure<Voltage> -> setControl(translationSysIDReq.withVolts(volts)) },
             null,
-            this
-        )
+            this,
+        ),
     )
 
     private val routineToApply = rotationSysIDRoutine // Change this to test different routines
 
-
     constructor(
         driveTrainConstants: SwerveDrivetrainConstants?,
         OdometryUpdateFrequency: Double,
-        vararg modules: SwerveModuleConstants?
+        vararg modules: SwerveModuleConstants?,
     ) : super(driveTrainConstants, OdometryUpdateFrequency, *modules) {
         if (Utils.isSimulation()) {
             startSimThread()
@@ -85,7 +84,7 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
 
     constructor(driveTrainConstants: SwerveDrivetrainConstants?, vararg modules: SwerveModuleConstants?) : super(
         driveTrainConstants,
-        *modules
+        *modules,
     ) {
         if (Utils.isSimulation()) {
             startSimThread()
