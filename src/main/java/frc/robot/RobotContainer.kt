@@ -4,10 +4,13 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
 import frc.robot.subsystems.swerve.Drivetrain
+import frc.robot.subsystems.swerve.SwerveTelemetry
 import frc.robot.subsystems.swerve.TunerConstants
+import kotlin.math.max
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -24,23 +27,18 @@ object RobotContainer {
 
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
 
-    val drivetrain: Drivetrain = Drivetrain(
-        TunerConstants.DrivetrainConstants,
-        arrayOf(
-            TunerConstants.FrontLeft,
-            TunerConstants.FrontRight,
-            TunerConstants.BackLeft,
-            TunerConstants.BackRight,
-        ),
-    )
+    private val maxSpeed: Double = TunerConstants.kSpeedAt12VoltsMps
+    private val maxAngularRate: Double = 1.5 * Math.PI
+    val drivetrain: Drivetrain = TunerConstants.drivetrain
+    private val telemetry: SwerveTelemetry = SwerveTelemetry()
+
+//    private val logger: SwerveLogger = SwerveLogger()
 
     private var teleopDriveRequest: SwerveRequest.FieldCentric = SwerveRequest.FieldCentric()
-        .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)
-        .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
-        .withDeadband(0.4).withRotationalDeadband(0.4)
+        .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
+        .withDeadband(maxSpeed * 0.1).withRotationalDeadband(maxAngularRate * 0.1)
 
-    init
-    {
+    init {
         configureBindings()
         // Reference the Autos object so that it is initialized, placing the chooser on the dashboard
         Autos
@@ -62,5 +60,7 @@ object RobotContainer {
                 .withVelocityY(-driverController.leftX)
                 .withRotationalRate(-driverController.rightX)
         }
+
+        drivetrain.registerTelemetry { state -> telemetry.telemetrize(state) }
     }
 }
