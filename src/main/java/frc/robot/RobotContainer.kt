@@ -1,7 +1,5 @@
 package frc.robot
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -25,16 +23,10 @@ object RobotContainer {
 
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
 
-    private val maxSpeed: Double = TunerConstants.kSpeedAt12VoltsMps
-    private val maxAngularRate: Double = 1.5 * Math.PI
     val drivetrain: Drivetrain = TunerConstants.drivetrain
     private val telemetry: SwerveTelemetry = SwerveTelemetry()
 
 //    private val logger: SwerveLogger = SwerveLogger()
-
-    private var teleopDriveRequest: SwerveRequest.FieldCentric = SwerveRequest.FieldCentric()
-        .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
-        .withDeadband(maxSpeed * 0.1).withRotationalDeadband(maxAngularRate * 0.1)
 
     init {
         configureBindings()
@@ -52,12 +44,11 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-        drivetrain.defaultCommand = drivetrain.applyRequest {
-            teleopDriveRequest
-                .withVelocityX(-driverController.leftY)
-                .withVelocityY(-driverController.leftX)
-                .withRotationalRate(-driverController.rightX)
-        }
+        drivetrain.defaultCommand = drivetrain.teleopDriveCommand(
+            { -driverController.leftY },
+            { -driverController.leftX },
+            { -driverController.rightX },
+        )
 
         drivetrain.registerTelemetry { state -> telemetry.telemetrize(state) }
     }

@@ -4,8 +4,10 @@ import com.ctre.phoenix6.SignalLogger
 import com.ctre.phoenix6.Utils
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
+import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.units.Measure
 import edu.wpi.first.units.Units
 import edu.wpi.first.units.Voltage
@@ -14,6 +16,7 @@ import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Subsystem
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
+import java.util.function.DoubleSupplier
 import java.util.function.Supplier
 
 /**
@@ -72,6 +75,19 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
 
     private val routineToApply = rotationSysIDRoutine // Change this to test different routines
 
+    val xLimiter: SlewRateLimiter = SlewRateLimiter(0.1)
+    val yLimiter: SlewRateLimiter = SlewRateLimiter(0.1)
+    val rotLimiter: SlewRateLimiter = SlewRateLimiter(0.1)
+
+    val teleopDriveRequest: SwerveRequest.FieldCentric = SwerveRequest.FieldCentric()
+        .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
+        .withDeadband(TunerConstants.kSpeedAt12VoltsMps * 0.1)
+        .withRotationalDeadband((1.5 * Math.PI) * 0.1)
+
+    private val autoRequest: SwerveRequest.ApplyChassisSpeeds = SwerveRequest.ApplyChassisSpeeds()
+        .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)
+        .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
+
     constructor(
         driveTrainConstants: SwerveDrivetrainConstants?,
         OdometryUpdateFrequency: Double,
@@ -116,6 +132,21 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
 
     fun sysIdDynamic(direction: SysIdRoutine.Direction): Command? {
         return routineToApply.dynamic(direction)
+    }
+
+    fun teleopDriveCommand(
+        xVelocity: DoubleSupplier,
+        yVelocity: DoubleSupplier,
+        rotationalRate: DoubleSupplier,
+    ): Command {
+        return this.run {
+            this.setControl(
+                teleopDriveRequest
+                    .withVelocityX(xLimiter.calculate(xVelocity.asDouble) * TunerConstants.kSpeedAt12VoltsMps)
+                    .withVelocityY(yLimiter.calculate(yVelocity.asDouble) * TunerConstants.kSpeedAt12VoltsMps)
+                    .withRotationalRate(rotLimiter.calculate(rotationalRate.asDouble) * TunerConstants.kSpeedAt12VoltsMps),
+            )
+        }
     }
 
     override fun periodic() {}
