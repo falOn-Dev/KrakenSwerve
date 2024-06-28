@@ -120,10 +120,10 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
                 PIDConstants(10.0, 0.0, 0.0),
                 TunerConstants.kSpeedAt12VoltsMps,
                 driveBaseRadius,
-                ReplanningConfig(true, true)
+                ReplanningConfig(true, true),
             ),
-            { DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)==DriverStation.Alliance.Red },
-        this
+            { DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red },
+            this,
         )
     }
 
