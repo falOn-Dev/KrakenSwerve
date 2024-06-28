@@ -150,6 +150,6 @@ spotless {
 			exclude "**/BuildConstants.kt", "**/build/**", "src/main/kotlin/com/team4099/lib/sim/**"
 		}
 		ktfmt()
-		ktlint().userData(['max_line_length': '120', 'insert_final_newline': 'true', 'indent_size': '2', 'continuation_indent_size': '2'])
+		ktlint().userData(['max_line_length': '120', 'insert_final_newline': 'true', 'indent_size': '2', 'continuation_indent_size': '2', 'no-wildcard-imports': 'false'])
 	}
 }

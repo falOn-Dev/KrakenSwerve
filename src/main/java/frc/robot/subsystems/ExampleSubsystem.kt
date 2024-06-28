@@ -11,10 +11,11 @@ object ExampleSubsystem : SubsystemBase() {
      *
      * @return a command
      */
-    fun exampleMethodCommand(): Command = runOnce {
-        // Subsystem.runOnce() implicitly add `this` as a required subsystem.
-        // TODO: one-time action goes here
-    }
+    fun exampleMethodCommand(): Command =
+        runOnce {
+            // Subsystem.runOnce() implicitly add `this` as a required subsystem.
+            // TODO: one-time action goes here
+        }
 
     /**
      * An example method querying a boolean state of the subsystem (for example, a digital sensor).

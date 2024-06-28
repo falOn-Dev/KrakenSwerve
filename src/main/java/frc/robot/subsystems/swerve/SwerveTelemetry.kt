@@ -10,15 +10,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 class SwerveTelemetry {
     val field: Field2d = Field2d()
 
-    val currentStatesPublisher: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault()
-        .getTable("swerve")
-        .getStructArrayTopic("currentStates", SwerveModuleState.struct)
-        .publish()
+    val currentStatesPublisher: StructArrayPublisher<SwerveModuleState> =
+        NetworkTableInstance.getDefault()
+            .getTable("swerve")
+            .getStructArrayTopic("currentStates", SwerveModuleState.struct)
+            .publish()
 
-    val desiredStatesPublisher: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault()
-        .getTable("swerve")
-        .getStructArrayTopic("desiredStates", SwerveModuleState.struct)
-        .publish()
+    val desiredStatesPublisher: StructArrayPublisher<SwerveModuleState> =
+        NetworkTableInstance.getDefault()
+            .getTable("swerve")
+            .getStructArrayTopic("desiredStates", SwerveModuleState.struct)
+            .publish()
 
     fun telemetrize(state: SwerveDriveState) {
         field.robotPose = state.Pose
