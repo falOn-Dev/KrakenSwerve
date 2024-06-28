@@ -2,15 +2,17 @@ package frc.robot.subsystems.swerve
 
 import com.ctre.phoenix6.SignalLogger
 import com.ctre.phoenix6.Utils
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
+import com.ctre.phoenix6.mechanisms.swerve.*
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig
+import com.pathplanner.lib.util.PIDConstants
+import com.pathplanner.lib.util.ReplanningConfig
 import edu.wpi.first.math.filter.SlewRateLimiter
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.units.Measure
 import edu.wpi.first.units.Units
 import edu.wpi.first.units.Voltage
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj2.command.Command
@@ -88,6 +90,9 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
         .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)
         .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
 
+    val chassisSpeeds: ChassisSpeeds
+        get() = m_kinematics.toChassisSpeeds(*state.ModuleStates)
+
     constructor(
         driveTrainConstants: SwerveDrivetrainConstants?,
         OdometryUpdateFrequency: Double,
@@ -96,6 +101,30 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
         if (Utils.isSimulation()) {
             startSimThread()
         }
+        configurePathPlanner()
+    }
+
+    private fun configurePathPlanner() {
+        var driveBaseRadius = 0.0
+        for (moduleLocation in m_moduleLocations) {
+            driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.norm)
+        }
+
+        AutoBuilder.configureHolonomic(
+            { this.state.Pose },
+            this::seedFieldRelative,
+            this::chassisSpeeds,
+            { speeds -> this.setControl(autoRequest.withSpeeds(speeds)) },
+            HolonomicPathFollowerConfig(
+                PIDConstants(10.0, 0.0, 0.0),
+                PIDConstants(10.0, 0.0, 0.0),
+                TunerConstants.kSpeedAt12VoltsMps,
+                driveBaseRadius,
+                ReplanningConfig(true, true)
+            ),
+            { DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)==DriverStation.Alliance.Red },
+        this
+        )
     }
 
     constructor(driveTrainConstants: SwerveDrivetrainConstants?, vararg modules: SwerveModuleConstants?) : super(
@@ -105,6 +134,7 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
         if (Utils.isSimulation()) {
             startSimThread()
         }
+        configurePathPlanner()
     }
 
     fun applyRequest(requestSupplier: Supplier<SwerveRequest?>): Command {
