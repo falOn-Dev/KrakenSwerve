@@ -19,6 +19,7 @@ import edu.wpi.first.units.Voltage
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Subsystem
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
@@ -75,7 +76,7 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
             SysIdRoutine.Config(
                 null,
                 Units.Volts.of(4.0),
-                null,
+                Units.Seconds.of(3.0),
                 { state -> SignalLogger.writeString("state", state.toString()) },
             ),
             SysIdRoutine.Mechanism(
@@ -85,7 +86,7 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
             ),
         )
 
-    private val routineToApply = rotationSysIDRoutine // Change this to test different routines
+    private val routineToApply = translationSysIDRoutine // Change this to test different routines
 
     val xLimiter: SlewRateLimiter = SlewRateLimiter(0.1)
     val yLimiter: SlewRateLimiter = SlewRateLimiter(0.1)
@@ -110,10 +111,20 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
         OdometryUpdateFrequency: Double,
         vararg modules: SwerveModuleConstants?,
     ) : super(driveTrainConstants, OdometryUpdateFrequency, *modules) {
+        init()
+    }
+
+    private fun init(){
         if (Utils.isSimulation()) {
             startSimThread()
         }
         configurePathPlanner()
+
+        this.Modules.forEach {
+            Shuffleboard.getTab("Swerve").addDouble(
+                "Module ${it.driveMotor.deviceID}"
+            ) { it.driveMotor.motorVoltage.valueAsDouble }
+        }
     }
 
     private fun configurePathPlanner() {
@@ -149,10 +160,7 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
         driveTrainConstants,
         *modules,
     ) {
-        if (Utils.isSimulation()) {
-            startSimThread()
-        }
-        configurePathPlanner()
+        init()
     }
 
     fun applyRequest(requestSupplier: Supplier<SwerveRequest?>): Command {
@@ -178,7 +186,7 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
         return routineToApply.quasistatic(direction)
     }
 
-    fun sysIdDynamic(direction: SysIdRoutine.Direction): Command? {
+    fun sysIdDynamic(direction: SysIdRoutine.Direction): Command {
         return routineToApply.dynamic(direction)
     }
 
@@ -191,13 +199,13 @@ class Drivetrain : SwerveDrivetrain, Subsystem {
             this.setControl(
                 teleopDriveRequest
                     .withVelocityX(
-                        xLimiter.calculate(xVelocity.asDouble) * TunerConstants.kSpeedAt12VoltsMps,
+                        (xVelocity.asDouble) * TunerConstants.kSpeedAt12VoltsMps,
                     )
                     .withVelocityY(
-                        yLimiter.calculate(yVelocity.asDouble) * TunerConstants.kSpeedAt12VoltsMps,
+                        (yVelocity.asDouble) * TunerConstants.kSpeedAt12VoltsMps,
                     )
                     .withRotationalRate(
-                        rotLimiter.calculate(rotationalRate.asDouble) *
+                        (rotationalRate.asDouble) *
                             TunerConstants.kSpeedAt12VoltsMps,
                     ),
             )

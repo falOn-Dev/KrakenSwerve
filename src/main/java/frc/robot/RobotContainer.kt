@@ -1,7 +1,11 @@
 package frc.robot
 
+import com.ctre.phoenix6.SignalLogger
+import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
 import frc.robot.subsystems.swerve.Drivetrain
@@ -45,12 +49,28 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-        drivetrain.defaultCommand =
-            drivetrain.teleopDriveCommand(
-                { -driverController.leftY },
-                { -driverController.leftX },
-                { -driverController.rightX },
+//        drivetrain.defaultCommand =
+//            drivetrain.teleopDriveCommand(
+//                { -driverController.leftY },
+//                { -driverController.leftX },
+//                { -driverController.rightX },
+//            )
+
+        driverController.b().whileTrue(
+            Commands.sequence(
+                drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
+                Commands.waitSeconds(1.0),
+                drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
+                Commands.waitSeconds(1.0),
+                drivetrain.sysIdDynamic(SysIdRoutine.Direction.kForward),
+                Commands.waitSeconds(1.0),
+                drivetrain.sysIdDynamic(SysIdRoutine.Direction.kReverse),
+                Commands.waitSeconds(1.0),
             )
+        )
+
+        driverController.leftBumper().onTrue(Commands.runOnce(SignalLogger::start))
+        driverController.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop))
 
         drivetrain.registerTelemetry { state -> telemetry.telemetrize(state) }
     }

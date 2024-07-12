@@ -1,5 +1,6 @@
 package frc.robot
 
+import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.hal.FRCNetComm.tInstances
 import edu.wpi.first.hal.FRCNetComm.tResourceType
 import edu.wpi.first.hal.HAL
@@ -42,6 +43,7 @@ object Robot : TimedRobot() {
         // Access the RobotContainer object so that it is initialized. This will perform all our
         // button bindings, and put our autonomous chooser on the dashboard.
         RobotContainer
+        SignalLogger.setPath("/media/sda1/ctre-logs")
     }
 
     /**
