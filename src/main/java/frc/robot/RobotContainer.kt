@@ -49,25 +49,25 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-//        drivetrain.defaultCommand =
-//            drivetrain.teleopDriveCommand(
-//                { -driverController.leftY },
-//                { -driverController.leftX },
-//                { -driverController.rightX },
-//            )
-
-        driverController.b().whileTrue(
-            Commands.sequence(
-                drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
-                Commands.waitSeconds(1.0),
-                drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
-                Commands.waitSeconds(1.0),
-                drivetrain.sysIdDynamic(SysIdRoutine.Direction.kForward),
-                Commands.waitSeconds(1.0),
-                drivetrain.sysIdDynamic(SysIdRoutine.Direction.kReverse),
-                Commands.waitSeconds(1.0),
+        drivetrain.defaultCommand =
+            drivetrain.teleopDriveCommand(
+                { -driverController.leftY },
+                { -driverController.leftX },
+                { -driverController.rightX },
             )
-        )
+
+//        driverController.b().whileTrue(
+//            Commands.sequence(
+//                drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
+//                Commands.waitSeconds(1.0),
+//                drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
+//                Commands.waitSeconds(1.0),
+//                drivetrain.sysIdDynamic(SysIdRoutine.Direction.kForward),
+//                Commands.waitSeconds(1.0),
+//                drivetrain.sysIdDynamic(SysIdRoutine.Direction.kReverse),
+//                Commands.waitSeconds(1.0),
+//            )
+//        )
 
         driverController.leftBumper().onTrue(Commands.runOnce(SignalLogger::start))
         driverController.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop))
