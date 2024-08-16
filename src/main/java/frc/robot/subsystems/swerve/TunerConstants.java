@@ -156,6 +156,6 @@ public class TunerConstants {
                     kBackRightSteerMotorId, kBackRightDriveMotorId, kBackRightEncoderId, kBackRightEncoderOffset, Units.inchesToMeters(kBackRightXPosInches), Units.inchesToMeters(kBackRightYPosInches), kInvertRightSide)
             .withSteerMotorInverted(kBackRightSteerInvert);
 
-    public static final DrivetrainIO drivetrain = new DrivetrainIO(DrivetrainConstants, FrontLeft,
+    public static final DrivetrainIOCTRE drivetrain = new DrivetrainIOCTRE(DrivetrainConstants, FrontLeft,
             FrontRight, BackLeft, BackRight);
 }

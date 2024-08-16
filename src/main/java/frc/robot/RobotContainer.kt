@@ -6,7 +6,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
+import frc.robot.subsystems.swerve.Drivetrain
 import frc.robot.subsystems.swerve.DrivetrainIO
+import frc.robot.subsystems.swerve.DrivetrainIOCTRE
 import frc.robot.subsystems.swerve.SwerveTelemetry
 import frc.robot.subsystems.swerve.TunerConstants
 
@@ -25,7 +27,7 @@ object RobotContainer {
 
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
 
-    val drivetrain: DrivetrainIO = TunerConstants.drivetrain
+    val drivetrain: Drivetrain = Drivetrain(object : DrivetrainIO {})
     private val telemetry: SwerveTelemetry = SwerveTelemetry()
 
     //    private val logger: SwerveLogger = SwerveLogger()

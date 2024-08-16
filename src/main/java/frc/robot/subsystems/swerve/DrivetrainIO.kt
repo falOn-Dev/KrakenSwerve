@@ -1,27 +1,13 @@
 package frc.robot.subsystems.swerve
 
-import com.ctre.phoenix6.BaseStatusSignal
-import com.ctre.phoenix6.StatusCode
-import com.ctre.phoenix6.StatusSignal
-import com.ctre.phoenix6.hardware.TalonFX
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants
-import com.ctre.phoenix6.signals.DeviceEnableValue
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.util.Units
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.inputs.LoggableInputs
 
-/**
- * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem so it can be used
- * in command-based projects easily.
- */
-class DrivetrainIO(driveTrainConstants: SwerveDrivetrainConstants?, vararg modules: SwerveModuleConstants?) :
-    SwerveDrivetrain(driveTrainConstants, *modules) {
+interface DrivetrainIO {
     class ModuleInputs : LoggableInputs {
         var driveEnabled: Boolean = false
         var driveDistanceMeters: Double = 0.0
@@ -202,154 +188,21 @@ class DrivetrainIO(driveTrainConstants: SwerveDrivetrainConstants?, vararg modul
         val drivetrainInputs: DrivetrainInputs = DrivetrainInputs()
     }
 
-    class SwerveModuleSignals(driveMotor: TalonFX, steerMotor: TalonFX) {
-        var steerVelocityStatusSignal: StatusSignal<Double> = steerMotor.velocity.clone()
-        var steerAccelerationStatusSignal: StatusSignal<Double> = steerMotor.acceleration.clone()
-        var steerPositionErrorStatusSignal: StatusSignal<Double> = steerMotor.closedLoopError.clone()
-        var steerPositionReferenceStatusSignal: StatusSignal<Double> = steerMotor.closedLoopReference.clone()
-        var drivePositionStatusSignal: StatusSignal<Double> = driveMotor.position.clone()
-        var driveVelocityErrorStatusSignal: StatusSignal<Double> = driveMotor.closedLoopError.clone()
-        var driveVelocityReferenceStatusSignal: StatusSignal<Double> = driveMotor.closedLoopReference.clone()
-        var driveAccelerationStatusSignal: StatusSignal<Double> = driveMotor.acceleration.clone()
-    }
+    fun updateInputs(inputs: DrivetrainInputsCollection)
 
-    val swerveModuleSignals: Array<SwerveModuleSignals> = arrayOf(
-        SwerveModuleSignals(this.Modules[0].driveMotor, this.Modules[0].steerMotor),
-        SwerveModuleSignals(this.Modules[1].driveMotor, this.Modules[1].steerMotor),
-        SwerveModuleSignals(this.Modules[2].driveMotor, this.Modules[2].steerMotor),
-        SwerveModuleSignals(this.Modules[3].driveMotor, this.Modules[3].steerMotor)
+    fun driveFieldRelative(
+        xVelocity: Double, yVelocity: Double, rotationalVelocity: Double, isOpenLoop: Boolean
     )
 
-    val pitchStatusSignal: StatusSignal<Double> = this.m_pigeon2.pitch.clone()
-    val rollStatusSignal: StatusSignal<Double> = this.m_pigeon2.roll.clone()
-    val angularVelocityXStatusSignal: StatusSignal<Double> = this.m_pigeon2.angularVelocityXWorld.clone()
-    val angularVelocityYStatusSignal: StatusSignal<Double> = this.m_pigeon2.angularVelocityYWorld.clone()
+    fun driveRobotRelative(
+        xVelocity: Double, yVelocity: Double, rotationalVelocity: Double, isOpenLoop: Boolean
+    )
 
-    init {
-        pitchStatusSignal.setUpdateFrequency(100.0)
-        rollStatusSignal.setUpdateFrequency(100.0)
-        angularVelocityXStatusSignal.setUpdateFrequency(100.0)
-        angularVelocityYStatusSignal.setUpdateFrequency(100.0)
-    }
+    fun setChassisSpeeds(speeds: ChassisSpeeds?, isOpenLoop: Boolean)
 
-    fun updateInputs(inputs: DrivetrainInputsCollection) {
-        updateGyroInputs(inputs.gyroInputs)
+    fun resetPose(pose: Pose2d?)
 
-        swerveModuleSignals.forEachIndexed { index, signals ->
-            updateSwerveModuleInputs(inputs.moduleInputs[index], this.Modules[index], signals)
-        }
-    }
+    fun resetPose()
 
-    private fun updateGyroInputs(gyroInputs: GyroInputs) {
-        BaseStatusSignal.refreshAll(
-            pitchStatusSignal,
-            rollStatusSignal,
-            angularVelocityXStatusSignal,
-            angularVelocityYStatusSignal
-        )
-
-        gyroInputs.connected = this.m_yawGetter.status == StatusCode.OK
-        gyroInputs.yawDeg =
-            BaseStatusSignal.getLatencyCompensatedValue(this.m_yawGetter, this.m_angularVelocity)
-        gyroInputs.pitchDeg =
-            BaseStatusSignal.getLatencyCompensatedValue(pitchStatusSignal, angularVelocityYStatusSignal)
-        gyroInputs.rollDeg =
-            BaseStatusSignal.getLatencyCompensatedValue(rollStatusSignal, angularVelocityXStatusSignal)
-
-        gyroInputs.yawDegPerSec = m_angularVelocity.valueAsDouble
-        gyroInputs.pitchDegPerSec = angularVelocityYStatusSignal.valueAsDouble
-        gyroInputs.rollDegPerSec = angularVelocityXStatusSignal.valueAsDouble
-    }
-
-    private fun updateSwerveModuleInputs(
-        inputs: ModuleInputs,
-        module: SwerveModule,
-        signals: SwerveModuleSignals
-    ) {
-        BaseStatusSignal.refreshAll(
-            signals.steerVelocityStatusSignal,
-            signals.steerAccelerationStatusSignal,
-            signals.steerPositionErrorStatusSignal,
-            signals.steerPositionReferenceStatusSignal,
-            signals.drivePositionStatusSignal,
-            signals.driveVelocityErrorStatusSignal,
-            signals.driveVelocityReferenceStatusSignal,
-            signals.driveAccelerationStatusSignal
-        )
-
-        val position = module.getPosition(false)
-        val state = module.currentState
-
-        inputs.driveEnabled =
-            module.driveMotor.deviceEnable.value == DeviceEnableValue.Enabled
-
-        inputs.driveDistanceMeters = position.distanceMeters
-        inputs.driveVelocityMetersPerSec = state.speedMetersPerSecond
-
-        inputs.driveVelocityReferenceMetersPerSec =
-            falconRPSToMechanismMPS(
-                module.driveMotor.closedLoopReference.valueAsDouble,
-                Units.inchesToMeters(4.0) * Math.PI,
-                TunerConstants.kDriveGearRatio
-            )
-        inputs.driveVelocityErrorMetersPerSec =
-            falconRPSToMechanismMPS(
-                module.driveMotor.closedLoopError.valueAsDouble,
-                Units.inchesToMeters(4.0) * Math.PI,
-                TunerConstants.kDriveGearRatio
-            )
-        inputs.driveAccelerationMetersPerSecPerSec =
-            falconRPSToMechanismMPS(
-                signals.driveAccelerationStatusSignal.valueAsDouble,
-                Units.inchesToMeters(4.0) * Math.PI,
-                TunerConstants.kDriveGearRatio
-            )
-
-        inputs.driveAppliedVolts = module.driveMotor.motorVoltage.value
-        inputs.driveStatorCurrentAmps = module.driveMotor.statorCurrent.value
-        inputs.driveSupplyCurrentAmps = module.driveMotor.supplyCurrent.value
-        inputs.driveTempCelsius = module.driveMotor.deviceTemp.value
-
-        inputs.steerAbsolutePositionDeg = module.caNcoder.absolutePosition.value * 360.0
-
-        inputs.steerEnabled =
-            module.steerMotor.deviceEnable.value == DeviceEnableValue.Enabled
-
-
-        // since we are using the FusedCANcoder feature, the position and velocity signal for the angle
-        // motor accounts for the gear ratio; so, pass a gear ratio of 1 to just convert from rotations
-        // to degrees.
-        inputs.steerPositionDeg = position.angle.degrees
-
-        inputs.steerPositionReferenceDeg =
-            falconRotationsToMechanismDegrees(
-                module.steerMotor.closedLoopReference.valueAsDouble,
-                1.0
-            )
-
-        inputs.steerPositionErrorDeg =
-            falconRotationsToMechanismDegrees(
-                module.steerMotor.closedLoopError.valueAsDouble,
-                1.0
-            )
-
-        inputs.steerVelocityRevPerMin =
-            falconRPSToMechanismRPM(
-                signals.steerVelocityStatusSignal.valueAsDouble,
-                1.0
-            )
-
-        inputs.steerAccelerationMetersPerSecPerSec =
-            falconRPSToMechanismRPM(
-                signals.steerAccelerationStatusSignal.valueAsDouble,
-                1.0
-            )
-
-        inputs.steerAppliedVolts = module.steerMotor.motorVoltage.value
-        inputs.steerStatorCurrentAmps = module.steerMotor.statorCurrent.value
-        inputs.steerSupplyCurrentAmps = module.steerMotor.supplyCurrent.value
-        inputs.steerTempCelsius = module.steerMotor.deviceTemp.value
-    }
-
-
+    fun setBrakeMode(enable: Boolean)
 }
