@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
 import frc.robot.Constants
 
-
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem so it can be used
  * in command-based projects easily.
@@ -45,7 +44,6 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
     private val kSimLoopPeriod: Double = 0.005 // 5 ms
     private var m_simNotifier: Notifier? = null
     private var m_lastSimTime = 0.0
-
 
     val swerveModuleSignals: Array<SwerveModuleSignals> = arrayOf(
         SwerveModuleSignals(this.Modules[0].driveMotor, this.Modules[0].steerMotor),
@@ -71,7 +69,7 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
         rollStatusSignal.setUpdateFrequency(100.0)
         angularVelocityXStatusSignal.setUpdateFrequency(100.0)
         angularVelocityYStatusSignal.setUpdateFrequency(100.0)
-        if(Constants.RobotConstants.mode == Constants.RobotConstants.Mode.SIM) {
+        if (Constants.RobotConstants.mode == Constants.RobotConstants.Mode.SIM) {
             setupSim()
         }
     }
@@ -95,21 +93,25 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
             updateSwerveModuleInputs(inputs.moduleInputs[index], this.Modules[index], signals)
         }
 
-        inputs.drivetrainInputs.swerveMeasuredStates = this.state.ModuleStates
-        inputs.drivetrainInputs.swerveReferenceStates = this.state.ModuleTargets
 
-        inputs.drivetrainInputs.robotPose = this.state.Pose
 
         inputs.drivetrainInputs.targetVXMetersPerSec = targetChassisSpeeds.vxMetersPerSecond
         inputs.drivetrainInputs.targetVYMetersPerSec = targetChassisSpeeds.vyMetersPerSecond
         inputs.drivetrainInputs.targetAngularVelocityRadPerSec =
             targetChassisSpeeds.omegaRadiansPerSecond
 
-        inputs.drivetrainInputs.measuredVXMetersPerSec = this.state.speeds.vxMetersPerSecond
-        inputs.drivetrainInputs.measuredVYMetersPerSec = this.state.speeds.vyMetersPerSecond
-        inputs.drivetrainInputs.measuredAngularVelocityRadPerSec = this.state.speeds.omegaRadiansPerSecond
+        if (this.state.Pose != null) {
+            inputs.drivetrainInputs.measuredVXMetersPerSec = this.state.speeds.vxMetersPerSecond
+            inputs.drivetrainInputs.measuredVYMetersPerSec = this.state.speeds.vyMetersPerSecond
+            inputs.drivetrainInputs.measuredAngularVelocityRadPerSec = this.state.speeds.omegaRadiansPerSecond
 
-        inputs.drivetrainInputs.rotation = this.state.Pose.rotation
+            inputs.drivetrainInputs.rotation = this.state.Pose.rotation
+
+            inputs.drivetrainInputs.swerveMeasuredStates = this.state.ModuleStates
+            inputs.drivetrainInputs.swerveReferenceStates = this.state.ModuleTargets
+
+            inputs.drivetrainInputs.robotPose = this.state.Pose
+        }
     }
 
     override fun driveFieldRelative(

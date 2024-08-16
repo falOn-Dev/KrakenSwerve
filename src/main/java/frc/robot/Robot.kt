@@ -43,7 +43,7 @@ object Robot : LoggedRobot() {
     override fun robotInit() {
         Logger.recordMetadata("ProjectName", "MyProject") // Set a metadata value
 
-        when(Constants.RobotConstants.mode){
+        when (Constants.RobotConstants.mode) {
             Constants.RobotConstants.Mode.REAL -> {
                 Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
                 Logger.addDataReceiver(NT4Publisher()) // Publish data to NetworkTables
@@ -71,7 +71,6 @@ object Robot : LoggedRobot() {
                 println("Robot is in REPLAY mode")
             }
         }
-
 
         Logger.start()
 

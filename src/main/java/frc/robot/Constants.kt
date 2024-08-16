@@ -18,9 +18,9 @@ object Constants {
         enum class Mode {
             REAL,
             SIM,
-            REPLAY
+            REPLAY,
         }
         private val simMode: Mode = Mode.SIM
-        val mode: Mode = if(RobotBase.isReal()) Mode.REAL else simMode
+        val mode: Mode = if (RobotBase.isReal()) Mode.REAL else simMode
     }
 }
