@@ -6,6 +6,7 @@ import edu.wpi.first.hal.FRCNetComm.tResourceType
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistribution
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.WPILibVersion
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
@@ -16,7 +17,6 @@ import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
-
 
 /**
  * The VM is configured to automatically run this object (which basically functions as a singleton
@@ -43,23 +43,35 @@ object Robot : LoggedRobot() {
     override fun robotInit() {
         Logger.recordMetadata("ProjectName", "MyProject") // Set a metadata value
 
-        if (isReal()) {
-            Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
-            Logger.addDataReceiver(NT4Publisher()) // Publish data to NetworkTables
-            PowerDistribution(1, PowerDistribution.ModuleType.kRev) // Enables power distribution logging
-        } else {
-            setUseTiming(false) // Run as fast as possible
-            val logPath = LogFileUtil.findReplayLog() // Pull the replay log from AdvantageScope (or prompt the user)
-            Logger.setReplaySource(WPILOGReader(logPath)) // Read replay log
-            Logger.addDataReceiver(
-                WPILOGWriter(
-                    LogFileUtil.addPathSuffix(
-                        logPath,
-                        "_sim"
-                    )
-                )
-            ) // Save outputs to a new log
+        when(Constants.RobotConstants.mode){
+            Constants.RobotConstants.Mode.REAL -> {
+                Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
+                Logger.addDataReceiver(NT4Publisher()) // Publish data to NetworkTables
+                PowerDistribution(1, PowerDistribution.ModuleType.kRev) // Enables power distribution logging
+                println("Robot is in REAL mode")
+            }
+
+            Constants.RobotConstants.Mode.SIM -> {
+                Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
+                Logger.addDataReceiver(NT4Publisher()) // Publish data to NetworkTables
+                println("Robot is in SIM mode")
+            }
+            Constants.RobotConstants.Mode.REPLAY -> {
+                setUseTiming(false) // Run as fast as possible
+                val logPath = LogFileUtil.findReplayLog() // Pull the replay log from AdvantageScope (or prompt the user)
+                Logger.setReplaySource(WPILOGReader(logPath)) // Read replay log
+                Logger.addDataReceiver(
+                    WPILOGWriter(
+                        LogFileUtil.addPathSuffix(
+                            logPath,
+                            "_sim",
+                        ),
+                    ),
+                ) // Save outputs to a new log
+                println("Robot is in REPLAY mode")
+            }
         }
+
 
         Logger.start()
 
@@ -90,6 +102,7 @@ object Robot : LoggedRobot() {
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run()
+        SmartDashboard.putData("Scheduler", CommandScheduler.getInstance())
     }
 
     /** This method is called once each time the robot enters Disabled mode. */

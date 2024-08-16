@@ -1,6 +1,5 @@
 package frc.robot.subsystems.swerve
 
-
 /**
  * @param falconRotations Falcon rotations
  * @param gearRatio gear ratio between Falcon and mechanism
@@ -46,7 +45,9 @@ fun rpmToFalconRPS(rpm: Double, gearRatio: Double): Double {
  * @return linear distance traveled by wheel in meters
  */
 fun falconRotationsToMechanismMeters(
-    falconRotations: Double, circumference: Double, gearRatio: Double
+    falconRotations: Double,
+    circumference: Double,
+    gearRatio: Double,
 ): Double {
     val wheelRotations = falconRotations / gearRatio
     return (wheelRotations * circumference)
@@ -59,7 +60,9 @@ fun falconRotationsToMechanismMeters(
  * @return mechanism linear velocity in meters per second
  */
 fun falconRPSToMechanismMPS(
-    falconRPS: Double, circumference: Double, gearRatio: Double
+    falconRPS: Double,
+    circumference: Double,
+    gearRatio: Double,
 ): Double {
     val wheelRPM = falconRPSToMechanismRPM(falconRPS, gearRatio)
     return (wheelRPM * circumference) / 60

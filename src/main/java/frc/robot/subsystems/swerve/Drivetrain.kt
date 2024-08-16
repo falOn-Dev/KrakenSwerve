@@ -2,7 +2,6 @@ package frc.robot.subsystems.swerve
 
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
-import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.Logger
@@ -16,7 +15,7 @@ class Drivetrain(val io: DrivetrainIO) : SubsystemBase() {
             return ChassisSpeeds(
                 inputs.drivetrainInputs.measuredVXMetersPerSec,
                 inputs.drivetrainInputs.measuredVYMetersPerSec,
-                inputs.drivetrainInputs.measuredAngularVelocityRadPerSec
+                inputs.drivetrainInputs.measuredAngularVelocityRadPerSec,
             )
         }
 
@@ -26,13 +25,12 @@ class Drivetrain(val io: DrivetrainIO) : SubsystemBase() {
     val pose: Pose2d
         get() = inputs.drivetrainInputs.robotPose
 
-
     fun driveCommand(
         forward: DoubleSupplier,
         strafe: DoubleSupplier,
         rotation: DoubleSupplier,
         fieldOriented: Boolean,
-        isOpenLoop: Boolean
+        isOpenLoop: Boolean,
     ): Command {
         return this.run {
             if (fieldOriented) {

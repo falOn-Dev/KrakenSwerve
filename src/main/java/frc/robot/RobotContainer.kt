@@ -8,7 +8,6 @@ import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
 import frc.robot.subsystems.swerve.Drivetrain
 import frc.robot.subsystems.swerve.DrivetrainIO
-import frc.robot.subsystems.swerve.DrivetrainIOCTRE
 import frc.robot.subsystems.swerve.SwerveTelemetry
 import frc.robot.subsystems.swerve.TunerConstants
 
@@ -27,7 +26,7 @@ object RobotContainer {
 
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
 
-    val drivetrain: Drivetrain = Drivetrain(object : DrivetrainIO {})
+    val drivetrain: Drivetrain = Drivetrain(TunerConstants.drivetrain)
     private val telemetry: SwerveTelemetry = SwerveTelemetry()
 
     //    private val logger: SwerveLogger = SwerveLogger()
@@ -49,7 +48,6 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-
 //        driverController.b().whileTrue(
 //            Commands.sequence(
 //                drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
@@ -66,6 +64,12 @@ object RobotContainer {
         driverController.leftBumper().onTrue(Commands.runOnce(SignalLogger::start))
         driverController.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop))
 
-        drivetrain.registerTelemetry { state -> telemetry.telemetrize(state) }
+        drivetrain.defaultCommand = drivetrain.driveCommand(
+            { driverController.leftY },
+            { driverController.leftX },
+            { driverController.rightX },
+            true,
+            false
+        ).withName("Drive Command")
     }
 }

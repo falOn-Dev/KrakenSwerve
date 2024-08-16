@@ -3,6 +3,7 @@ package frc.robot.subsystems.swerve
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.StatusCode
 import com.ctre.phoenix6.StatusSignal
+import com.ctre.phoenix6.Utils
 import com.ctre.phoenix6.configs.MotorOutputConfigs
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain
@@ -18,6 +19,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.util.Units
+import edu.wpi.first.wpilibj.Notifier
+import edu.wpi.first.wpilibj.RobotController
+import frc.robot.Constants
+
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem so it can be used
@@ -37,11 +42,16 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
         var driveAccelerationStatusSignal: StatusSignal<Double> = driveMotor.acceleration.clone()
     }
 
+    private val kSimLoopPeriod: Double = 0.005 // 5 ms
+    private var m_simNotifier: Notifier? = null
+    private var m_lastSimTime = 0.0
+
+
     val swerveModuleSignals: Array<SwerveModuleSignals> = arrayOf(
         SwerveModuleSignals(this.Modules[0].driveMotor, this.Modules[0].steerMotor),
         SwerveModuleSignals(this.Modules[1].driveMotor, this.Modules[1].steerMotor),
         SwerveModuleSignals(this.Modules[2].driveMotor, this.Modules[2].steerMotor),
-        SwerveModuleSignals(this.Modules[3].driveMotor, this.Modules[3].steerMotor)
+        SwerveModuleSignals(this.Modules[3].driveMotor, this.Modules[3].steerMotor),
     )
 
     val pitchStatusSignal: StatusSignal<Double> = this.m_pigeon2.pitch.clone()
@@ -61,6 +71,21 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
         rollStatusSignal.setUpdateFrequency(100.0)
         angularVelocityXStatusSignal.setUpdateFrequency(100.0)
         angularVelocityYStatusSignal.setUpdateFrequency(100.0)
+        if(Constants.RobotConstants.mode == Constants.RobotConstants.Mode.SIM) {
+            setupSim()
+        }
+    }
+
+    private fun setupSim() {
+        m_lastSimTime = Utils.getCurrentTimeSeconds()
+
+        m_simNotifier = Notifier {
+            val currentTime = Utils.getCurrentTimeSeconds()
+            val dt = currentTime - m_lastSimTime
+            m_lastSimTime = currentTime
+
+            updateSimState(dt, RobotController.getBatteryVoltage())
+        }
     }
 
     override fun updateInputs(inputs: DrivetrainIO.DrivetrainInputsCollection) {
@@ -85,21 +110,20 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
         inputs.drivetrainInputs.measuredAngularVelocityRadPerSec = this.state.speeds.omegaRadiansPerSecond
 
         inputs.drivetrainInputs.rotation = this.state.Pose.rotation
-
     }
 
     override fun driveFieldRelative(
         xVelocity: Double,
         yVelocity: Double,
         rotationalVelocity: Double,
-        isOpenLoop: Boolean
+        isOpenLoop: Boolean,
     ) {
         this.targetChassisSpeeds =
             ChassisSpeeds.discretize(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xVelocity, yVelocity, rotationalVelocity, this.state.Pose.rotation
+                    xVelocity, yVelocity, rotationalVelocity, this.state.Pose.rotation,
                 ),
-                0.02
+                0.02,
             )
 
         if (isOpenLoop) {
@@ -109,7 +133,7 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
                     .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
                     .withVelocityX(xVelocity)
                     .withVelocityY(yVelocity)
-                    .withRotationalRate(rotationalVelocity)
+                    .withRotationalRate(rotationalVelocity),
             )
         } else {
             this.setControl(
@@ -118,7 +142,7 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
                     .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
                     .withVelocityX(xVelocity)
                     .withVelocityY(yVelocity)
-                    .withRotationalRate(rotationalVelocity)
+                    .withRotationalRate(rotationalVelocity),
             )
         }
     }
@@ -127,12 +151,12 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
         xVelocity: Double,
         yVelocity: Double,
         rotationalVelocity: Double,
-        isOpenLoop: Boolean
+        isOpenLoop: Boolean,
     ) {
         this.targetChassisSpeeds =
             ChassisSpeeds.discretize(
                 ChassisSpeeds(xVelocity, yVelocity, rotationalVelocity),
-                0.02
+                0.02,
             )
 
         if (isOpenLoop) {
@@ -142,7 +166,7 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
                     .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
                     .withVelocityX(xVelocity)
                     .withVelocityY(yVelocity)
-                    .withRotationalRate(rotationalVelocity)
+                    .withRotationalRate(rotationalVelocity),
             )
         } else {
             this.setControl(
@@ -151,7 +175,7 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
                     .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
                     .withVelocityX(xVelocity)
                     .withVelocityY(yVelocity)
-                    .withRotationalRate(rotationalVelocity)
+                    .withRotationalRate(rotationalVelocity),
             )
         }
     }
@@ -166,14 +190,14 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
                 applyChassisSpeedsRequest
                     .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
                     .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
-                    .withSpeeds(speeds)
+                    .withSpeeds(speeds),
             )
         } else {
             this.setControl(
                 applyChassisSpeedsRequest
                     .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)
                     .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
-                    .withSpeeds(speeds)
+                    .withSpeeds(speeds),
             )
         }
     }
@@ -200,7 +224,7 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
             pitchStatusSignal,
             rollStatusSignal,
             angularVelocityXStatusSignal,
-            angularVelocityYStatusSignal
+            angularVelocityYStatusSignal,
         )
 
         gyroInputs.connected = this.m_yawGetter.status == StatusCode.OK
@@ -219,7 +243,7 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
     private fun updateSwerveModuleInputs(
         inputs: DrivetrainIO.ModuleInputs,
         module: SwerveModule,
-        signals: SwerveModuleSignals
+        signals: SwerveModuleSignals,
     ) {
         BaseStatusSignal.refreshAll(
             signals.steerVelocityStatusSignal,
@@ -229,7 +253,7 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
             signals.drivePositionStatusSignal,
             signals.driveVelocityErrorStatusSignal,
             signals.driveVelocityReferenceStatusSignal,
-            signals.driveAccelerationStatusSignal
+            signals.driveAccelerationStatusSignal,
         )
 
         val position = module.getPosition(false)
@@ -245,19 +269,19 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
             falconRPSToMechanismMPS(
                 module.driveMotor.closedLoopReference.valueAsDouble,
                 Units.inchesToMeters(4.0) * Math.PI,
-                TunerConstants.kDriveGearRatio
+                TunerConstants.kDriveGearRatio,
             )
         inputs.driveVelocityErrorMetersPerSec =
             falconRPSToMechanismMPS(
                 module.driveMotor.closedLoopError.valueAsDouble,
                 Units.inchesToMeters(4.0) * Math.PI,
-                TunerConstants.kDriveGearRatio
+                TunerConstants.kDriveGearRatio,
             )
         inputs.driveAccelerationMetersPerSecPerSec =
             falconRPSToMechanismMPS(
                 signals.driveAccelerationStatusSignal.valueAsDouble,
                 Units.inchesToMeters(4.0) * Math.PI,
-                TunerConstants.kDriveGearRatio
+                TunerConstants.kDriveGearRatio,
             )
 
         inputs.driveAppliedVolts = module.driveMotor.motorVoltage.value
@@ -270,7 +294,6 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
         inputs.steerEnabled =
             module.steerMotor.deviceEnable.value == DeviceEnableValue.Enabled
 
-
         // since we are using the FusedCANcoder feature, the position and velocity signal for the angle
         // motor accounts for the gear ratio; so, pass a gear ratio of 1 to just convert from rotations
         // to degrees.
@@ -279,25 +302,25 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
         inputs.steerPositionReferenceDeg =
             falconRotationsToMechanismDegrees(
                 module.steerMotor.closedLoopReference.valueAsDouble,
-                1.0
+                1.0,
             )
 
         inputs.steerPositionErrorDeg =
             falconRotationsToMechanismDegrees(
                 module.steerMotor.closedLoopError.valueAsDouble,
-                1.0
+                1.0,
             )
 
         inputs.steerVelocityRevPerMin =
             falconRPSToMechanismRPM(
                 signals.steerVelocityStatusSignal.valueAsDouble,
-                1.0
+                1.0,
             )
 
         inputs.steerAccelerationMetersPerSecPerSec =
             falconRPSToMechanismRPM(
                 signals.steerAccelerationStatusSignal.valueAsDouble,
-                1.0
+                1.0,
             )
 
         inputs.steerAppliedVolts = module.steerMotor.motorVoltage.value
@@ -305,8 +328,4 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
         inputs.steerSupplyCurrentAmps = module.steerMotor.supplyCurrent.value
         inputs.steerTempCelsius = module.steerMotor.deviceTemp.value
     }
-
-
-
-
 }
