@@ -5,11 +5,18 @@ import edu.wpi.first.hal.FRCNetComm.tInstances
 import edu.wpi.first.hal.FRCNetComm.tResourceType
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.TimedRobot
+import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.util.WPILibVersion
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Autos
+import org.littletonrobotics.junction.LogFileUtil
+import org.littletonrobotics.junction.LoggedRobot
+import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.networktables.NT4Publisher
+import org.littletonrobotics.junction.wpilog.WPILOGReader
+import org.littletonrobotics.junction.wpilog.WPILOGWriter
+
 
 /**
  * The VM is configured to automatically run this object (which basically functions as a singleton
@@ -22,7 +29,7 @@ import frc.robot.commands.Autos
  * update the `Main.kt` file in the project. (If you use the IDE's Rename or Move refactorings when
  * renaming the object or package, it will get changed everywhere.)
  */
-object Robot : TimedRobot() {
+object Robot : LoggedRobot() {
     /**
      * The autonomous command to run. While a default value is set here, the [autonomousInit] method
      * will set it to the value selected in the AutoChooser on the dashboard.
@@ -34,6 +41,28 @@ object Robot : TimedRobot() {
      * code.
      */
     override fun robotInit() {
+        Logger.recordMetadata("ProjectName", "MyProject") // Set a metadata value
+
+        if (isReal()) {
+            Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
+            Logger.addDataReceiver(NT4Publisher()) // Publish data to NetworkTables
+            PowerDistribution(1, PowerDistribution.ModuleType.kRev) // Enables power distribution logging
+        } else {
+            setUseTiming(false) // Run as fast as possible
+            val logPath = LogFileUtil.findReplayLog() // Pull the replay log from AdvantageScope (or prompt the user)
+            Logger.setReplaySource(WPILOGReader(logPath)) // Read replay log
+            Logger.addDataReceiver(
+                WPILOGWriter(
+                    LogFileUtil.addPathSuffix(
+                        logPath,
+                        "_sim"
+                    )
+                )
+            ) // Save outputs to a new log
+        }
+
+        Logger.start()
+
         // Report the use of the Kotlin Language for "FRC Usage Report" statistics
         HAL.report(
             tResourceType.kResourceType_Language,

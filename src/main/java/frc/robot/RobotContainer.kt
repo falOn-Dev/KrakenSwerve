@@ -2,13 +2,11 @@ package frc.robot
 
 import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
-import frc.robot.subsystems.swerve.Drivetrain
+import frc.robot.subsystems.swerve.DrivetrainIO
 import frc.robot.subsystems.swerve.SwerveTelemetry
 import frc.robot.subsystems.swerve.TunerConstants
 
@@ -27,7 +25,7 @@ object RobotContainer {
 
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
 
-    val drivetrain: Drivetrain = TunerConstants.drivetrain
+    val drivetrain: DrivetrainIO = TunerConstants.drivetrain
     private val telemetry: SwerveTelemetry = SwerveTelemetry()
 
     //    private val logger: SwerveLogger = SwerveLogger()
@@ -49,12 +47,6 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-        drivetrain.defaultCommand =
-            drivetrain.teleopDriveCommand(
-                { -driverController.leftY },
-                { -driverController.leftX },
-                { -driverController.rightX },
-            )
 
 //        driverController.b().whileTrue(
 //            Commands.sequence(
