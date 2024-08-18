@@ -85,7 +85,7 @@ class DrivetrainIOCTRE(driveTrainConstants: SwerveDrivetrainConstants?, vararg m
             updateSimState(dt, RobotController.getBatteryVoltage())
         }
 
-        m_simNotifier!!.startPeriodic(0.005)
+        m_simNotifier!!.startPeriodic(kSimLoopPeriod)
     }
 
     override fun updateInputs(inputs: DrivetrainIO.DrivetrainInputsCollection) {
