@@ -8,7 +8,7 @@ import edu.wpi.first.math.util.Units
 import frc.robot.Constants
 import kotlin.math.cos
 
-class Module(private val config: SwerveModuleConstants) {
+class SwerveModule(val config: SwerveModuleConstants) {
     private val io: ModuleIO
     val inputs: ModuleIO.ModuleInputs = ModuleIO.ModuleInputs()
 

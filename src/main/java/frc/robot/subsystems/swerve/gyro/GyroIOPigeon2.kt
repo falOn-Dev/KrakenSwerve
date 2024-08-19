@@ -31,4 +31,8 @@ class GyroIOPigeon2(private val configs: SwerveDrivetrainConstants) : GyroIO {
         inputs.yawDegrees = Rotation2d.fromDegrees(BaseStatusSignal.getLatencyCompensatedValue(yawGetter, yawRateGetter))
         inputs.yawVelocityDegreesPerSecond = yawRateGetter.value
     }
+
+    override fun setYaw(newYaw: Rotation2d) {
+        gyro.setYaw(newYaw.degrees)
+    }
 }

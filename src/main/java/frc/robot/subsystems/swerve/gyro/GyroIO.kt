@@ -23,4 +23,6 @@ interface GyroIO {
     }
 
     fun updateInputs(inputs: GyroInputs) {}
+
+    fun setYaw(newYaw: Double) {}
 }
