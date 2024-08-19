@@ -25,7 +25,7 @@ object RobotContainer {
 
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
 
-    val drivetrain: Drivetrain = Drivetrain(TunerConstants.drivetrain)
+    val drivetrain: Drivetrain = TunerConstants.drivetrain
     private val telemetry: SwerveTelemetry = SwerveTelemetry()
 
     //    private val logger: SwerveLogger = SwerveLogger()
@@ -67,8 +67,6 @@ object RobotContainer {
             { driverController.leftY },
             { driverController.leftX },
             { driverController.rightX },
-            true,
-            false,
-        ).withName("Drive Command")
+        )
     }
 }

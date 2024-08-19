@@ -10,6 +10,10 @@ import edu.wpi.first.wpilibj.RobotBase
  */
 
 object Constants {
+    object SwerveConstants {
+        const val CANBusName = "swerve"
+    }
+
     object OperatorConstants {
         const val DRIVER_CONTROLLER_PORT = 0
     }
@@ -20,7 +24,7 @@ object Constants {
             SIM,
             REPLAY,
         }
-        private val simMode: Mode = Mode.REPLAY
+        private val simMode: Mode = Mode.SIM
         val mode: Mode = if (RobotBase.isReal()) Mode.REAL else simMode
     }
 }
