@@ -166,4 +166,8 @@ class ModuleIOKraken(
         driveMotor.setControl(neutralOut)
         turnMotor.setControl(neutralOut)
     }
+
+    override fun reset() {
+        driveMotor.setPosition(0.0)
+    }
 }

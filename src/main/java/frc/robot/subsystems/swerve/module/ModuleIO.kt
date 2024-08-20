@@ -75,4 +75,6 @@ interface ModuleIO {
     fun runDriveVelocitySetpoint(velocityRadPerSec: Double) {}
 
     fun stop() {}
+
+    fun reset() {}
 }

@@ -38,6 +38,8 @@ class SwerveModule(val config: SwerveModuleConstants) {
             Constants.RobotConstants.Mode.SIM -> object : ModuleIO {}
             Constants.RobotConstants.Mode.REPLAY -> object : ModuleIO {}
         }
+
+        io.reset()
     }
 
     fun apply(state: SwerveModuleState) {
