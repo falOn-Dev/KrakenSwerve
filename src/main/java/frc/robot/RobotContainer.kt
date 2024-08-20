@@ -68,6 +68,7 @@ object RobotContainer {
             { -MathUtil.applyDeadband(driverController.leftY, 0.05) },
             { -MathUtil.applyDeadband(driverController.leftX, 0.05) },
             { MathUtil.applyDeadband(driverController.rightX, 0.05) },
+            { true }
         )
     }
 }

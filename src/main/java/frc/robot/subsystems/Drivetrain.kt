@@ -18,6 +18,7 @@ import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2
 import frc.robot.subsystems.swerve.gyro.GyroIOSim
 import frc.robot.subsystems.swerve.module.SwerveModule
 import org.littletonrobotics.junction.Logger
+import java.util.function.BooleanSupplier
 import java.util.function.DoubleSupplier
 
 class Drivetrain(
@@ -33,7 +34,13 @@ class Drivetrain(
     val gyroInputs: GyroIO.GyroInputs = GyroIO.GyroInputs()
 
     private val modules: Array<SwerveModule> = moduleConstants.map { SwerveModule(it) }.toTypedArray() // FL, FR, BL, BR
-    private val moduleStates: Array<SwerveModuleState> = arrayOf(
+    private val desiredStates: Array<SwerveModuleState> = arrayOf(
+        SwerveModuleState(),
+        SwerveModuleState(),
+        SwerveModuleState(),
+        SwerveModuleState(),
+    )
+    private val measuredStates: Array<SwerveModuleState> = arrayOf(
         SwerveModuleState(),
         SwerveModuleState(),
         SwerveModuleState(),
@@ -86,20 +93,29 @@ class Drivetrain(
         gyro.setYaw(0.0)
     }
 
-    fun driveCommand(forwards: DoubleSupplier, strafe: DoubleSupplier, rotation: DoubleSupplier): Command? {
+    fun driveCommand(forwards: DoubleSupplier, strafe: DoubleSupplier, rotation: DoubleSupplier, isFieldOriented: BooleanSupplier): Command? {
         return this.run {
-            currentSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-                forwards.asDouble * 3.5,
-                strafe.asDouble * 3.5,
-                rotation.asDouble * (Math.PI),
-                gyroInputs.yawDegrees
-            )
+            if(isFieldOriented.asBoolean){
+                currentSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                    forwards.asDouble * TunerConstants.kSpeedAt12VoltsMps,
+                    strafe.asDouble * TunerConstants.kSpeedAt12VoltsMps,
+                    rotation.asDouble  * (Math.PI),
+                    gyroInputs.yawDegrees
+                )
+            } else {
+                currentSpeeds = ChassisSpeeds(
+                    forwards.asDouble * 3.5,
+                    strafe.asDouble * 3.5,
+                    rotation.asDouble * (Math.PI),
+                )
+            }
 
             val swerveModuleStates = kinematics.toSwerveModuleStates(currentSpeeds)
 
             SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, TunerConstants.kSpeedAt12VoltsMps)
 
             modules.forEachIndexed { index, module ->
+                desiredStates[index] = swerveModuleStates[index]
                 module.apply(swerveModuleStates[index])
             }
         }
@@ -116,8 +132,9 @@ class Drivetrain(
 
         Logger.recordOutput("swerve/pose", poseEstimator.estimatedPosition)
         modules.forEachIndexed { index, swerveModule ->
-            moduleStates[index] = swerveModule.state
+            measuredStates[index] = swerveModule.state
         }
-        Logger.recordOutput("swerve/states", *moduleStates)
+        Logger.recordOutput("swerve/measuredState", *measuredStates)
+        Logger.recordOutput("swerve/desiredState", *desiredStates)
     }
 }
