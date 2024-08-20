@@ -84,8 +84,8 @@ object Robot : LoggedRobot() {
         // Access the RobotContainer object so that it is initialized. This will perform all our
         // button bindings, and put our autonomous chooser on the dashboard.
         RobotContainer
-        SignalLogger.setPath("/media/sda1/ctre-logs")
         DriverStation.silenceJoystickConnectionWarning(true)
+        SignalLogger.stop()
     }
 
     /**

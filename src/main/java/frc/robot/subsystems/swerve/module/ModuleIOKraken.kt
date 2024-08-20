@@ -129,7 +129,7 @@ class ModuleIOKraken(
         ).isOK
 
         inputs.drivePositionRads = Units.rotationsToRadians(drivePosition.value)
-        inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.value)
+        inputs.driveVelocityRadPerSec = (driveVelocity.value)
         inputs.driveSupplyVolts = driveSupplyVoltage.value
         inputs.driveMotorVolts = driveMotorVoltage.value
         inputs.driveStatorCurrent = driveStatorCurrent.value
@@ -157,7 +157,9 @@ class ModuleIOKraken(
     }
 
     override fun runDriveVelocitySetpoint(velocityRadPerSec: Double) {
-        driveMotor.setControl(driveClosedLoop.withVelocity(Units.radiansToRotations(velocityRadPerSec)))
+        val speedRotations: Double = Units.radiansToRotations(velocityRadPerSec)
+//        println("RotPerSec: $speedRotations")
+        driveMotor.setControl(driveClosedLoop.withVelocity(speedRotations))
     }
 
     override fun stop() {

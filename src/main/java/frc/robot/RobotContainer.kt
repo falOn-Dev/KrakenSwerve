@@ -1,6 +1,7 @@
 package frc.robot
 
 import com.ctre.phoenix6.SignalLogger
+import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
@@ -64,9 +65,9 @@ object RobotContainer {
         driverController.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop))
 
         drivetrain.defaultCommand = drivetrain.driveCommand(
-            { driverController.leftY },
-            { driverController.leftX },
-            { driverController.rightX },
+            { -MathUtil.applyDeadband(driverController.leftY, 0.05) },
+            { -MathUtil.applyDeadband(driverController.leftX, 0.05) },
+            { MathUtil.applyDeadband(driverController.rightX, 0.05) },
         )
     }
 }
