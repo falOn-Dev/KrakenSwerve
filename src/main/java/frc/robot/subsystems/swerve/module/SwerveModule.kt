@@ -35,7 +35,7 @@ class SwerveModule(val config: SwerveModuleConstants) {
     init {
         io = when (Constants.RobotConstants.mode) {
             Constants.RobotConstants.Mode.REAL -> ModuleIOKraken(config)
-            Constants.RobotConstants.Mode.SIM -> object : ModuleIO {}
+            Constants.RobotConstants.Mode.SIM -> ModuleIOSim(config)
             Constants.RobotConstants.Mode.REPLAY -> object : ModuleIO {}
         }
 
