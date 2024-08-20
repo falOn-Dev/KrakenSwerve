@@ -8,12 +8,14 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
+import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
 import frc.robot.subsystems.swerve.TunerConstants
 import frc.robot.subsystems.swerve.gyro.GyroIO
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2
+import frc.robot.subsystems.swerve.gyro.GyroIOSim
 import frc.robot.subsystems.swerve.module.SwerveModule
 import org.littletonrobotics.junction.Logger
 import java.util.function.DoubleSupplier
@@ -24,13 +26,21 @@ class Drivetrain(
 ) : SubsystemBase() {
     private val gyro: GyroIO = when (Constants.RobotConstants.mode) {
         Constants.RobotConstants.Mode.REAL -> GyroIOPigeon2(drivetrainConstants)
-        Constants.RobotConstants.Mode.SIM -> object : GyroIO {}
+        Constants.RobotConstants.Mode.SIM -> GyroIOSim(this::currentSpeeds)
         Constants.RobotConstants.Mode.REPLAY -> object : GyroIO {}
     }
 
     val gyroInputs: GyroIO.GyroInputs = GyroIO.GyroInputs()
 
     private val modules: Array<SwerveModule> = moduleConstants.map { SwerveModule(it) }.toTypedArray() // FL, FR, BL, BR
+    private val moduleStates: Array<SwerveModuleState> = arrayOf(
+        SwerveModuleState(),
+        SwerveModuleState(),
+        SwerveModuleState(),
+        SwerveModuleState(),
+    )
+
+    private var currentSpeeds: ChassisSpeeds = ChassisSpeeds()
 
     private val kinematics: SwerveDriveKinematics = SwerveDriveKinematics(*getModuleTranslations())
 
@@ -78,14 +88,14 @@ class Drivetrain(
 
     fun driveCommand(forwards: DoubleSupplier, strafe: DoubleSupplier, rotation: DoubleSupplier): Command? {
         return this.run {
-            val swerveModuleStates = kinematics.toSwerveModuleStates(
-                ChassisSpeeds.fromRobotRelativeSpeeds(
-                    forwards.asDouble * 3.5,
-                    strafe.asDouble * 3.5,
-                    rotation.asDouble * (Math.PI),
-                    gyroInputs.yawDegrees
-                )
+            currentSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
+                forwards.asDouble * 3.5,
+                strafe.asDouble * 3.5,
+                rotation.asDouble * (Math.PI),
+                gyroInputs.yawDegrees
             )
+
+            val swerveModuleStates = kinematics.toSwerveModuleStates(currentSpeeds)
 
             SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, TunerConstants.kSpeedAt12VoltsMps)
 
@@ -105,5 +115,9 @@ class Drivetrain(
         poseEstimator.update(gyroInputs.yawDegrees, getModulePositions())
 
         Logger.recordOutput("swerve/pose", poseEstimator.estimatedPosition)
+        modules.forEachIndexed { index, swerveModule ->
+            moduleStates[index] = swerveModule.state
+        }
+        Logger.recordOutput("swerve/states", *moduleStates)
     }
 }
