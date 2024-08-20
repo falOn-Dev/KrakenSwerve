@@ -17,7 +17,7 @@ class ModuleIOSim(private val configs: SwerveModuleConstants): ModuleIO {
         DCMotorSim(DCMotor.getKrakenX60(1), configs.SteerMotorGearRatio, 0.004)
 
     private val driveFeedback = PIDController(0.0, 0.0, 0.0, 0.02)
-    private val turnFeedback = PIDController(0.0, 0.0, 0.0, 0.02)
+    private val turnFeedback = PIDController(1.0, 0.0, 0.0, 0.02)
 
     private val driveFeedforward: SimpleMotorFeedforward = SimpleMotorFeedforward(configs.DriveMotorGains.kS, configs.DriveMotorGains.kV, configs.DriveMotorGains.kA)
     private val turnFeedforward: SimpleMotorFeedforward = SimpleMotorFeedforward(configs.SteerMotorGains.kS, configs.SteerMotorGains.kV, configs.SteerMotorGains.kA)
@@ -45,7 +45,7 @@ class ModuleIOSim(private val configs: SwerveModuleConstants): ModuleIO {
         inputs.driveSupplyCurrent = driveMotorSim.currentDrawAmps
 
         inputs.turnPosition = Rotation2d.fromRadians(turnMotorSim.angularPositionRad)
-        inputs.absoluteTurnPosition = Rotation2d.fromRadians(turnMotorSim.angularPositionRad).plus(turnAbsoluteInitPosition)
+        inputs.absoluteTurnPosition = Rotation2d.fromRadians(turnMotorSim.angularPositionRad)
         inputs.turnVelocityRadPerSec = turnMotorSim.angularVelocityRadPerSec
         inputs.turnSupplyVolts = steerAppliedVolts
         inputs.turnMotorVolts = steerAppliedVolts

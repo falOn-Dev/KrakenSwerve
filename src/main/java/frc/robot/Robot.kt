@@ -72,6 +72,8 @@ object Robot : LoggedRobot() {
             }
         }
 
+        Logger.recordMetadata("Mode", Constants.RobotConstants.mode.name)
+
         Logger.start()
 
         // Report the use of the Kotlin Language for "FRC Usage Report" statistics
