@@ -18,6 +18,8 @@ class GyroIOPigeon2(private val configs: SwerveDrivetrainConstants) : GyroIO {
         val gyroConfigs: Pigeon2Configuration = configs.Pigeon2Configs
         gyro.configurator.setYaw(0.0)
         gyro.configurator.apply(gyroConfigs)
+        yawGetter.setUpdateFrequency(100.0)
+        yawRateGetter.setUpdateFrequency(100.0)
         gyro.optimizeBusUtilization()
     }
 
@@ -32,7 +34,7 @@ class GyroIOPigeon2(private val configs: SwerveDrivetrainConstants) : GyroIO {
         inputs.yawVelocityDegreesPerSecond = yawRateGetter.value
     }
 
-    override fun setYaw(newYaw: Rotation2d) {
-        gyro.setYaw(newYaw.degrees)
+    override fun setYaw(newYaw: Double) {
+        gyro.setYaw(newYaw)
     }
 }

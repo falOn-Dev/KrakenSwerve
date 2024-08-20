@@ -4,13 +4,14 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
+import frc.robot.subsystems.swerve.TunerConstants
 import frc.robot.subsystems.swerve.gyro.GyroIO
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2
 import frc.robot.subsystems.swerve.module.SwerveModule
@@ -42,7 +43,12 @@ class Drivetrain(
 
 
     private fun getModuleTranslations(): Array<Translation2d> {
-        val translations: Array<Translation2d> = emptyArray()
+        val translations: Array<Translation2d> = arrayOf(
+            Translation2d(),
+            Translation2d(),
+            Translation2d(),
+            Translation2d(),
+        )
 
         modules.forEachIndexed { index, module ->
             translations[index] = Translation2d(module.config.LocationX, module.config.LocationY)
@@ -52,7 +58,12 @@ class Drivetrain(
     }
 
     private fun getModulePositions(): Array<SwerveModulePosition> {
-        val positions: Array<SwerveModulePosition> = emptyArray()
+        val positions: Array<SwerveModulePosition> = arrayOf(
+            SwerveModulePosition(),
+            SwerveModulePosition(),
+            SwerveModulePosition(),
+            SwerveModulePosition(),
+        )
 
         modules.forEachIndexed { index, module ->
             positions[index] = module.modulePosition
@@ -65,18 +76,22 @@ class Drivetrain(
         gyro.setYaw(0.0)
     }
 
-    fun driveCommand(forwards: DoubleSupplier, strafe: DoubleSupplier, rotation: DoubleSupplier) {
-        val swerveModuleStates = kinematics.toSwerveModuleStates(
-            ChassisSpeeds.fromRobotRelativeSpeeds(
-                forwards.asDouble * 3.5,
-                strafe.asDouble * 3.5,
-                rotation.asDouble * ( Math.PI ),
-                gyroInputs.yawDegrees
+    fun driveCommand(forwards: DoubleSupplier, strafe: DoubleSupplier, rotation: DoubleSupplier): Command? {
+        return this.run {
+            val swerveModuleStates = kinematics.toSwerveModuleStates(
+                ChassisSpeeds.fromRobotRelativeSpeeds(
+                    forwards.asDouble * 3.5,
+                    strafe.asDouble * 3.5,
+                    rotation.asDouble * (Math.PI),
+                    gyroInputs.yawDegrees
+                )
             )
-        )
 
-        modules.forEachIndexed { index, module ->
-            module.apply(swerveModuleStates[index])
+            SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, TunerConstants.kSpeedAt12VoltsMps)
+
+            modules.forEachIndexed { index, module ->
+                module.apply(swerveModuleStates[index])
+            }
         }
     }
 
