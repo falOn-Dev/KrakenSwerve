@@ -10,7 +10,7 @@ import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.simulation.DCMotorSim
 
 
-class ModuleIOSim(private val configs: SwerveModuleConstants): ModuleIO {
+class ModuleIOSim(configs: SwerveModuleConstants): ModuleIO {
     private val driveMotorSim: DCMotorSim =
         DCMotorSim(DCMotor.getKrakenX60(1), configs.DriveMotorGearRatio, 0.025)
     private val turnMotorSim: DCMotorSim =
