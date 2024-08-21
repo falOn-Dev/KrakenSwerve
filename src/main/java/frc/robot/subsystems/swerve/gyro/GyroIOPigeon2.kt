@@ -13,6 +13,10 @@ class GyroIOPigeon2(private val configs: SwerveDrivetrainConstants) : GyroIO {
 
     private val yawGetter: StatusSignal<Double> = gyro.yaw
     private val yawRateGetter: StatusSignal<Double> = gyro.angularVelocityZWorld
+    private val pitchGetter: StatusSignal<Double> = gyro.pitch
+    private val pitchRateGetter: StatusSignal<Double> = gyro.angularVelocityXWorld
+    private val rollGetter: StatusSignal<Double> = gyro.roll
+    private val rollRateGetter: StatusSignal<Double> = gyro.angularVelocityYWorld
 
     init {
         val gyroConfigs: Pigeon2Configuration = configs.Pigeon2Configs
@@ -20,6 +24,10 @@ class GyroIOPigeon2(private val configs: SwerveDrivetrainConstants) : GyroIO {
         gyro.configurator.apply(gyroConfigs)
         yawGetter.setUpdateFrequency(100.0)
         yawRateGetter.setUpdateFrequency(100.0)
+        pitchGetter.setUpdateFrequency(100.0)
+        pitchRateGetter.setUpdateFrequency(100.0)
+        rollGetter.setUpdateFrequency(100.0)
+        rollRateGetter.setUpdateFrequency(100.0)
         gyro.optimizeBusUtilization()
     }
 
@@ -30,8 +38,12 @@ class GyroIOPigeon2(private val configs: SwerveDrivetrainConstants) : GyroIO {
                 yawRateGetter
             ).isOK
 
-        inputs.yawDegrees = Rotation2d.fromDegrees(BaseStatusSignal.getLatencyCompensatedValue(yawGetter, yawRateGetter))
+        inputs.yaw = Rotation2d.fromDegrees(BaseStatusSignal.getLatencyCompensatedValue(yawGetter, yawRateGetter))
         inputs.yawVelocityDegreesPerSecond = yawRateGetter.value
+        inputs.pitch = Rotation2d.fromDegrees(BaseStatusSignal.getLatencyCompensatedValue(pitchGetter, pitchRateGetter))
+        inputs.pitchVelocityDegreesPerSecond = pitchRateGetter.value
+        inputs.roll = Rotation2d.fromDegrees(BaseStatusSignal.getLatencyCompensatedValue(rollGetter, rollRateGetter))
+        inputs.rollVelocityDegreesPerSecond = rollRateGetter.value
     }
 
     override fun setYaw(newYaw: Double) {

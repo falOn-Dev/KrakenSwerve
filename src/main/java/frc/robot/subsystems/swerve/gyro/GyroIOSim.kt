@@ -11,7 +11,7 @@ class GyroIOSim(private val speeds: Supplier<ChassisSpeeds>) : GyroIO {
         val oldYaw = yawDegrees
         val robotSpeeds = speeds.get()
         inputs.connected = true
-        inputs.yawDegrees = inputs.yawDegrees.plus(Rotation2d.fromRadians(robotSpeeds.omegaRadiansPerSecond * 0.02))
+        inputs.yaw = inputs.yaw.plus(Rotation2d.fromRadians(robotSpeeds.omegaRadiansPerSecond * 0.02))
         inputs.yawVelocityDegreesPerSecond = (yawDegrees - oldYaw) / 0.02
     }
 
