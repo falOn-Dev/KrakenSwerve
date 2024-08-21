@@ -21,36 +21,80 @@ import org.littletonrobotics.junction.Logger
 import java.util.function.BooleanSupplier
 import java.util.function.DoubleSupplier
 
+/**
+ * Drivetrain subsystem using Falon's custom swerve code
+ *
+ * @constructor Instantiates a swerve subsystem using CTRE's constants class
+ * @param drivetrainConstants Drivetrain parameters like Pigeon ID and CAN bus name
+ * @param moduleConstants Array of module constants containing things like motor IDs, inversions, and offsets
+ *
+ * @author Falon C.
+ */
 class Drivetrain(
     private val drivetrainConstants: SwerveDrivetrainConstants,
     vararg val moduleConstants: SwerveModuleConstants,
 ) : SubsystemBase() {
+
+    /**
+     * Gyro IO for interacting with a gyroscope, automatically initializes between Real, Sim, and Replay (blank interface)
+     */
     private val gyro: GyroIO = when (Constants.RobotConstants.mode) {
         Constants.RobotConstants.Mode.REAL -> GyroIOPigeon2(drivetrainConstants)
-        Constants.RobotConstants.Mode.SIM -> GyroIOSim(this::currentSpeeds)
+        Constants.RobotConstants.Mode.SIM -> GyroIOSim(this::robotRelativeSpeeds)
         Constants.RobotConstants.Mode.REPLAY -> object : GyroIO {}
     }
 
+    /**
+     * Gyro inputs for reading values out of the gyro IO interface
+     */
     val gyroInputs: GyroIO.GyroInputs = GyroIO.GyroInputs()
 
-    private val modules: Array<SwerveModule> = moduleConstants.map { SwerveModule(it) }.toTypedArray() // FL, FR, BL, BR
-    private val desiredStates: Array<SwerveModuleState> = arrayOf(
-        SwerveModuleState(),
-        SwerveModuleState(),
-        SwerveModuleState(),
-        SwerveModuleState(),
-    )
-    private val measuredStates: Array<SwerveModuleState> = arrayOf(
-        SwerveModuleState(),
-        SwerveModuleState(),
-        SwerveModuleState(),
-        SwerveModuleState(),
-    )
+    /**
+     * Array of [SwerveModule], used internally for interacting with modules
+     * Stored in the order FL, FR, BL, BR
+     */
+    private val modules: Array<SwerveModule> = moduleConstants.map { SwerveModule(it) }.toTypedArray()
 
-    private var currentSpeeds: ChassisSpeeds = ChassisSpeeds()
+    /**
+     * Array of [SwerveModuleState] used for storing desired states, these are then logged for tuning purposes
+     */
+    private val desiredStates: Array<SwerveModuleState> = Array(4) { SwerveModuleState() }
 
+    /**
+     * Array of [SwerveModuleState] used for storing measured states from drivebase's modules, these are then logged for tuning purposes
+     */
+    private val measuredStates: Array<SwerveModuleState> = Array(4) { SwerveModuleState() }
+
+    /**
+     * Array of [Translation2d] used for storing the physical positions of modules, used for kinematics
+     */
+    private val moduleTranslations: Array<Translation2d> = Array(4) { Translation2d() }
+
+    /**
+     * Array of [SwerveModulePosition] used for storing the distance traveled of each module, this is for odometry
+     */
+    private val modulePositions: Array<SwerveModulePosition> = Array(4) { SwerveModulePosition() }
+
+    /**
+     * Robot relative speeds of the robot, used for logging and gyro simulation
+     */
+    val robotRelativeSpeeds: ChassisSpeeds
+        get() = ChassisSpeeds.fromFieldRelativeSpeeds(kinematics.toChassisSpeeds(*measuredStates), gyroInputs.yaw.unaryMinus())
+
+    /**
+     * Field relative speeds of the robot, used for logging and gyro simulation
+     */
+    val fieldRelativeSpeeds: ChassisSpeeds
+        get() = kinematics.toChassisSpeeds(*measuredStates)
+
+    /**
+     * Kinematics object used for calculating module states from chassis speeds and vice versa
+     */
     private val kinematics: SwerveDriveKinematics = SwerveDriveKinematics(*getModuleTranslations())
 
+    /**
+     * Pose estimator used for calculating the robot's position on the field
+     */
     private val poseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(
         kinematics,
         gyroInputs.yaw,
@@ -58,47 +102,54 @@ class Drivetrain(
         Pose2d(),
     )
 
+    /**
+     * Current pose of the robot on the field
+     */
     val pose: Pose2d
         get() = poseEstimator.estimatedPosition
 
+    /**
+     * Method for getting the module translations from the module constants
+     *
+     * @return Array of [Translation2d] containing the module translations
+     */
     private fun getModuleTranslations(): Array<Translation2d> {
-        val translations: Array<Translation2d> = arrayOf(
-            Translation2d(),
-            Translation2d(),
-            Translation2d(),
-            Translation2d(),
-        )
-
         modules.forEachIndexed { index, module ->
-            translations[index] = Translation2d(module.config.LocationX, module.config.LocationY)
+            moduleTranslations[index] = Translation2d(module.config.LocationX, module.config.LocationY)
         }
 
-        return translations
+        return moduleTranslations
     }
 
+    /**
+     * Method for getting the module positions from the module constants
+     *
+     * @return Array of [SwerveModulePosition] containing the module positions
+     */
     private fun getModulePositions(): Array<SwerveModulePosition> {
-        val positions: Array<SwerveModulePosition> = arrayOf(
-            SwerveModulePosition(),
-            SwerveModulePosition(),
-            SwerveModulePosition(),
-            SwerveModulePosition(),
-        )
-
         modules.forEachIndexed { index, module ->
-            positions[index] = module.modulePosition
+            modulePositions[index] = module.modulePosition
         }
 
-        return positions
+        return modulePositions
     }
 
+    /**
+     * Method for resetting the heading of the robot
+     */
     fun resetHeading() {
         gyro.setYaw(0.0)
     }
 
+    /**
+     * Method for setting the heading of the robot
+     *
+     * @param heading New heading of the robot
+     */
     fun applyChassisSpeeds(speeds: ChassisSpeeds) {
-        currentSpeeds = ChassisSpeeds.discretize(speeds, 0.02)
+        val discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02)
 
-        val swerveModuleStates = kinematics.toSwerveModuleStates(currentSpeeds)
+        val swerveModuleStates = kinematics.toSwerveModuleStates(discreteSpeeds)
 
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, TunerConstants.kSpeedAt12VoltsMps)
 
@@ -108,7 +159,23 @@ class Drivetrain(
         }
     }
 
-    fun driveCommand(forwards: DoubleSupplier, strafe: DoubleSupplier, rotation: DoubleSupplier, isFieldOriented: BooleanSupplier): Command? {
+    /**
+     * Factory for creating a command to drive the robot
+     * This command will create chassis speeds from the inputs and apply them to the robot
+     *
+     * @param forwards Supplier for the forwards speed of the robot
+     * @param strafe Supplier for the strafe speed of the robot
+     * @param rotation Supplier for the rotation speed of the robot
+     * @param isFieldOriented Supplier for whether the robot is field oriented or not
+     *
+     * @return Command for driving the robot
+     */
+    fun driveCommand(
+        forwards: DoubleSupplier,
+        strafe: DoubleSupplier,
+        rotation: DoubleSupplier,
+        isFieldOriented: BooleanSupplier
+    ): Command? {
         return this.run {
             val speeds = if (isFieldOriented.asBoolean) {
                 ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -129,10 +196,20 @@ class Drivetrain(
         }
     }
 
+    /**
+     * Method for resetting the odometry of the robot
+     *
+     * @param pose New pose of the robot
+     */
     fun resetOdometry(pose: Pose2d) {
         poseEstimator.resetPosition(gyroInputs.yaw, getModulePositions(), pose)
     }
 
+    /**
+     * Periodic method, runs every loop
+     *
+     * This method updates the gyro inputs, module inputs, and pose estimator
+     */
     override fun periodic() {
         gyro.updateInputs(gyroInputs)
         Logger.processInputs("swerve/gyro", gyroInputs)
