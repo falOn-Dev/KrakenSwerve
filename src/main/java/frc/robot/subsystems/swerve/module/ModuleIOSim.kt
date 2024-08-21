@@ -19,7 +19,11 @@ class ModuleIOSim(private val configs: SwerveModuleConstants): ModuleIO {
     private val driveFeedback = PIDController(0.0, 0.0, 0.0, 0.02)
     private val turnFeedback = PIDController(25.0, 0.0, 0.0, 0.02)
 
-    private val driveFeedforward: SimpleMotorFeedforward = SimpleMotorFeedforward(configs.DriveMotorGains.kS, configs.DriveMotorGains.kV, configs.DriveMotorGains.kA)
+    private val driveKv = 12.0 / (configs.SpeedAt12VoltsMps / Units.inchesToMeters(2.0))
+
+    // kV is just the slope of a linear regression on the Points 0,0 and 77.17 (Max speed in radians), 12 (Max voltage)
+    private val driveFeedforward: SimpleMotorFeedforward = SimpleMotorFeedforward(0.0, driveKv)
+
     private val turnFeedforward: SimpleMotorFeedforward = SimpleMotorFeedforward(configs.SteerMotorGains.kS, configs.SteerMotorGains.kV, configs.SteerMotorGains.kA)
 
     private var driveAppliedVolts: Double = 0.0
@@ -28,6 +32,7 @@ class ModuleIOSim(private val configs: SwerveModuleConstants): ModuleIO {
 
     init {
         turnFeedback.enableContinuousInput(-Math.PI, Math.PI)
+        println(driveKv)
     }
 
     override fun updateInputs(inputs: ModuleIO.ModuleInputs) {
