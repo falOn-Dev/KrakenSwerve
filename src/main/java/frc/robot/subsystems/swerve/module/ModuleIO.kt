@@ -5,7 +5,7 @@ import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.inputs.LoggableInputs
 
 interface ModuleIO {
-    class ModuleInputs: LoggableInputs {
+    class ModuleInputs : LoggableInputs {
         var driveMotorConnected: Boolean = false
         var turnMotorConnected: Boolean = false
 

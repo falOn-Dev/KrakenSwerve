@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.PrintCommand
 import frc.robot.subsystems.ExampleSubsystem
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 
 object Autos {
     private val autoModeChooser =
@@ -12,6 +13,11 @@ object Autos {
             AutoMode.values().forEach { addOption(it.optionName, it) }
             setDefaultOption(AutoMode.default.optionName, AutoMode.default)
         }
+
+    private val loggedAutoChooser: LoggedDashboardChooser<AutoMode> =
+        LoggedDashboardChooser("Auto Mode", autoModeChooser)
+
+
 
     val defaultAutonomousCommand: Command
         get() = AutoMode.default.command

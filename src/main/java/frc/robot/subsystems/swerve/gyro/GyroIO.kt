@@ -5,7 +5,7 @@ import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.inputs.LoggableInputs
 
 interface GyroIO {
-    class GyroInputs: LoggableInputs {
+    class GyroInputs : LoggableInputs {
         var connected: Boolean = false
         var yaw: Rotation2d = Rotation2d()
         var yawVelocityDegreesPerSecond: Double = 0.0

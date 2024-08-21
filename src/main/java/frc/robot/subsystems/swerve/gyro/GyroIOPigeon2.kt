@@ -35,7 +35,7 @@ class GyroIOPigeon2(private val configs: SwerveDrivetrainConstants) : GyroIO {
         inputs.connected =
             BaseStatusSignal.refreshAll(
                 yawGetter,
-                yawRateGetter
+                yawRateGetter,
             ).isOK
 
         inputs.yaw = Rotation2d.fromDegrees(BaseStatusSignal.getLatencyCompensatedValue(yawGetter, yawRateGetter))

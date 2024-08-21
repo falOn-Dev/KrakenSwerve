@@ -20,7 +20,7 @@ import edu.wpi.first.math.util.Units
 import frc.robot.Constants
 
 class ModuleIOKraken(
-    private val config: SwerveModuleConstants
+    private val config: SwerveModuleConstants,
 ) : ModuleIO {
 
     private val driveMotor: TalonFX = TalonFX(config.DriveMotorId, Constants.SwerveConstants.CANBusName)
@@ -53,7 +53,7 @@ class ModuleIOKraken(
 
     private val speedAt12VoltsMps: Double = config.SpeedAt12VoltsMps
 
-    init    {
+    init {
         val driveConfigs: TalonFXConfiguration = config.DriveMotorInitialConfigs
         driveConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake
 
@@ -64,8 +64,11 @@ class ModuleIOKraken(
         driveConfigs.CurrentLimits.StatorCurrentLimitEnable = true
         driveConfigs.Feedback.SensorToMechanismRatio = config.DriveMotorGearRatio
 
-        driveConfigs.MotorOutput.Inverted = if (config.DriveMotorInverted) InvertedValue.Clockwise_Positive
-        else InvertedValue.CounterClockwise_Positive
+        driveConfigs.MotorOutput.Inverted = if (config.DriveMotorInverted) {
+            InvertedValue.Clockwise_Positive
+        } else {
+            InvertedValue.CounterClockwise_Positive
+        }
 
         var status: StatusCode = driveMotor.configurator.apply(driveConfigs)
         if (!status.isOK) {
@@ -76,8 +79,11 @@ class ModuleIOKraken(
         turnConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake
 
         turnConfigs.Slot0 = config.SteerMotorGains
-        turnConfigs.MotorOutput.Inverted = if (config.SteerMotorInverted) InvertedValue.Clockwise_Positive
-        else InvertedValue.CounterClockwise_Positive
+        turnConfigs.MotorOutput.Inverted = if (config.SteerMotorInverted) {
+            InvertedValue.Clockwise_Positive
+        } else {
+            InvertedValue.CounterClockwise_Positive
+        }
         turnConfigs.Feedback.FeedbackRemoteSensorID = config.CANcoderId
 
         if (turnMotor.isProLicensed.value) {
@@ -115,7 +121,7 @@ class ModuleIOKraken(
             driveSupplyVoltage,
             driveMotorVoltage,
             driveStatorCurrent,
-            driveSupplyCurrent
+            driveSupplyCurrent,
         ).isOK
 
         inputs.turnMotorConnected = BaseStatusSignal.refreshAll(
@@ -125,7 +131,7 @@ class ModuleIOKraken(
             turnMotorVoltage,
             turnStatorCurrent,
             turnSupplyCurrent,
-            turnAbsolutePosition
+            turnAbsolutePosition,
         ).isOK
 
         inputs.drivePositionRads = Units.rotationsToRadians(drivePosition.value)

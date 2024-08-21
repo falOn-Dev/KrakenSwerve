@@ -30,8 +30,6 @@ class SwerveModule(val config: SwerveModuleConstants) {
     val modulePosition: SwerveModulePosition
         get() = SwerveModulePosition(positionMeters, angle)
 
-
-
     init {
         io = when (Constants.RobotConstants.mode) {
             Constants.RobotConstants.Mode.REAL -> ModuleIOKraken(config)

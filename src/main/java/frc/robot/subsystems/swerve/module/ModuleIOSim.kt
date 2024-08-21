@@ -9,8 +9,7 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.simulation.DCMotorSim
 
-
-class ModuleIOSim(configs: SwerveModuleConstants): ModuleIO {
+class ModuleIOSim(configs: SwerveModuleConstants) : ModuleIO {
     private val driveMotorSim: DCMotorSim =
         DCMotorSim(DCMotor.getKrakenX60(1), configs.DriveMotorGearRatio, 0.025)
     private val turnMotorSim: DCMotorSim =
@@ -70,13 +69,13 @@ class ModuleIOSim(configs: SwerveModuleConstants): ModuleIO {
 
     override fun runTurnPositionSetpoint(positionRads: Double) {
         runTurnVolts(
-            turnFeedback.calculate(turnMotorSim.angularPositionRad, positionRads) + turnFeedforward.calculate(positionRads)
+            turnFeedback.calculate(turnMotorSim.angularPositionRad, positionRads) + turnFeedforward.calculate(positionRads),
         )
     }
 
     override fun runDriveVelocitySetpoint(velocityRadPerSec: Double) {
         runDriveVolts(
-            driveFeedback.calculate(driveMotorSim.angularVelocityRadPerSec, velocityRadPerSec) + driveFeedforward.calculate(velocityRadPerSec)
+            driveFeedback.calculate(driveMotorSim.angularVelocityRadPerSec, velocityRadPerSec) + driveFeedforward.calculate(velocityRadPerSec),
         )
     }
 

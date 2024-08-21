@@ -23,7 +23,7 @@ import java.util.function.DoubleSupplier
 
 class Drivetrain(
     private val drivetrainConstants: SwerveDrivetrainConstants,
-    vararg val moduleConstants: SwerveModuleConstants
+    vararg val moduleConstants: SwerveModuleConstants,
 ) : SubsystemBase() {
     private val gyro: GyroIO = when (Constants.RobotConstants.mode) {
         Constants.RobotConstants.Mode.REAL -> GyroIOPigeon2(drivetrainConstants)
@@ -53,11 +53,13 @@ class Drivetrain(
 
     private val poseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(
         kinematics,
-        gyroInputs.yawDegrees,
+        gyroInputs.yaw,
         getModulePositions(),
-        Pose2d()
+        Pose2d(),
     )
 
+    val pose: Pose2d
+        get() = poseEstimator.estimatedPosition
 
     private fun getModuleTranslations(): Array<Translation2d> {
         val translations: Array<Translation2d> = arrayOf(
@@ -93,32 +95,42 @@ class Drivetrain(
         gyro.setYaw(0.0)
     }
 
+    fun applyChassisSpeeds(speeds: ChassisSpeeds) {
+        currentSpeeds = ChassisSpeeds.discretize(speeds, 0.02)
+
+        val swerveModuleStates = kinematics.toSwerveModuleStates(currentSpeeds)
+
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, TunerConstants.kSpeedAt12VoltsMps)
+
+        modules.forEachIndexed { index, module ->
+            desiredStates[index] = swerveModuleStates[index]
+            module.apply(swerveModuleStates[index])
+        }
+    }
+
     fun driveCommand(forwards: DoubleSupplier, strafe: DoubleSupplier, rotation: DoubleSupplier, isFieldOriented: BooleanSupplier): Command? {
         return this.run {
-            if(isFieldOriented.asBoolean){
-                currentSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+            val speeds = if (isFieldOriented.asBoolean) {
+                ChassisSpeeds.fromFieldRelativeSpeeds(
                     forwards.asDouble * TunerConstants.kSpeedAt12VoltsMps,
                     strafe.asDouble * TunerConstants.kSpeedAt12VoltsMps,
-                    rotation.asDouble  * (Math.PI),
-                    gyroInputs.yawDegrees
+                    rotation.asDouble * (Math.PI),
+                    gyroInputs.yaw,
                 )
             } else {
-                currentSpeeds = ChassisSpeeds(
+                ChassisSpeeds(
                     forwards.asDouble * 3.5,
                     strafe.asDouble * 3.5,
                     rotation.asDouble * (Math.PI),
                 )
             }
 
-            val swerveModuleStates = kinematics.toSwerveModuleStates(currentSpeeds)
-
-            SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, TunerConstants.kSpeedAt12VoltsMps)
-
-            modules.forEachIndexed { index, module ->
-                desiredStates[index] = swerveModuleStates[index]
-                module.apply(swerveModuleStates[index])
-            }
+            applyChassisSpeeds(speeds)
         }
+    }
+
+    fun resetOdometry(pose: Pose2d) {
+        poseEstimator.resetPosition(gyroInputs.yaw, getModulePositions(), pose)
     }
 
     override fun periodic() {
@@ -128,7 +140,7 @@ class Drivetrain(
             it.updateInputs()
             Logger.processInputs("swerve/module[${index + 1}]", it.inputs)
         }
-        poseEstimator.update(gyroInputs.yawDegrees, getModulePositions())
+        poseEstimator.update(gyroInputs.yaw, getModulePositions())
 
         Logger.recordOutput("swerve/pose", poseEstimator.estimatedPosition)
         modules.forEachIndexed { index, swerveModule ->
