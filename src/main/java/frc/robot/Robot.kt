@@ -1,6 +1,7 @@
 package frc.robot
 
 import com.ctre.phoenix6.SignalLogger
+import edu.wpi.first.cameraserver.CameraServer
 import edu.wpi.first.hal.FRCNetComm.tInstances
 import edu.wpi.first.hal.FRCNetComm.tResourceType
 import edu.wpi.first.hal.HAL
@@ -45,7 +46,7 @@ object Robot : LoggedRobot() {
 
         when (Constants.RobotConstants.mode) {
             Constants.RobotConstants.Mode.REAL -> {
-                Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
+//                Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
                 Logger.addDataReceiver(NT4Publisher()) // Publish data to NetworkTables
                 PowerDistribution(1, PowerDistribution.ModuleType.kRev) // Enables power distribution logging
                 println("Robot is in REAL mode")
@@ -88,6 +89,8 @@ object Robot : LoggedRobot() {
         RobotContainer
         DriverStation.silenceJoystickConnectionWarning(true)
         SignalLogger.stop()
+
+        CameraServer.startAutomaticCapture()
     }
 
     /**

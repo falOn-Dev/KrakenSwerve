@@ -1,4 +1,4 @@
-package frc.robot.subsystems
+package frc.robot.subsystems.swerve
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants
@@ -12,7 +12,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
-import frc.robot.subsystems.swerve.TunerConstants
 import frc.robot.subsystems.swerve.gyro.GyroIO
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2
 import frc.robot.subsystems.swerve.gyro.GyroIOSim
@@ -174,20 +173,20 @@ class Drivetrain(
         forwards: DoubleSupplier,
         strafe: DoubleSupplier,
         rotation: DoubleSupplier,
-        isFieldOriented: BooleanSupplier
+        isFieldOriented: BooleanSupplier,
     ): Command? {
         return this.run {
             val speeds = if (isFieldOriented.asBoolean) {
                 ChassisSpeeds.fromFieldRelativeSpeeds(
-                    forwards.asDouble * TunerConstants.kSpeedAt12VoltsMps,
-                    strafe.asDouble * TunerConstants.kSpeedAt12VoltsMps,
+                    forwards.asDouble * 1.5,
+                    strafe.asDouble * 1.5,
                     rotation.asDouble * (Math.PI),
                     gyroInputs.yaw,
                 )
             } else {
                 ChassisSpeeds(
-                    forwards.asDouble * 3.5,
-                    strafe.asDouble * 3.5,
+                    forwards.asDouble * 1.5,
+                    strafe.asDouble * 1.5,
                     rotation.asDouble * (Math.PI),
                 )
             }

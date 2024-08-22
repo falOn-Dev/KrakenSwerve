@@ -5,7 +5,7 @@ import com.choreo.lib.ChoreoTrajectory
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.swerve.Drivetrain
 
 fun getPath(traj: ChoreoTrajectory, isRed: Boolean, drivebase: Drivetrain, parallel: Command = InstantCommand()): Command {
     return Choreo.choreoSwerveCommand(

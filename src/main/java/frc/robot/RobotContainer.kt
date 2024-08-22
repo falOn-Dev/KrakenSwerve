@@ -1,15 +1,15 @@
 package frc.robot
 
-import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.math.MathUtil
-import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
-import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.swerve.Drivetrain
 import frc.robot.subsystems.swerve.SwerveTelemetry
 import frc.robot.subsystems.swerve.TunerConstants
+import frc.robot.subsystems.vision.AprilTagVision
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -24,9 +24,10 @@ import frc.robot.subsystems.swerve.TunerConstants
  */
 object RobotContainer {
 
-    private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
+    private val driverController: CommandXboxController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
 
     val drivetrain: Drivetrain = TunerConstants.drivetrain
+    val poseVision: AprilTagVision = AprilTagVision()
     private val telemetry: SwerveTelemetry = SwerveTelemetry()
 
     //    private val logger: SwerveLogger = SwerveLogger()
@@ -61,14 +62,13 @@ object RobotContainer {
 //            )
 //        )
 
-        driverController.leftBumper().onTrue(Commands.runOnce(SignalLogger::start))
-        driverController.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop))
-
         drivetrain.defaultCommand = drivetrain.driveCommand(
             { -MathUtil.applyDeadband(driverController.leftY, 0.05) },
             { -MathUtil.applyDeadband(driverController.leftX, 0.05) },
-            { MathUtil.applyDeadband(driverController.rightX, 0.05) },
-            { true },
+            { -MathUtil.applyDeadband(driverController.rightX, 0.05) },
+            driverController.leftBumper().negate(),
         )
+
+        driverController.rightBumper().onTrue(InstantCommand(drivetrain::resetHeading))
     }
 }

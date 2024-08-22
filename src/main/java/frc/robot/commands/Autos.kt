@@ -17,8 +17,6 @@ object Autos {
     private val loggedAutoChooser: LoggedDashboardChooser<AutoMode> =
         LoggedDashboardChooser("Auto Mode", autoModeChooser)
 
-
-
     val defaultAutonomousCommand: Command
         get() = AutoMode.default.command
 
