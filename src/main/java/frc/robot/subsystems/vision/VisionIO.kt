@@ -18,6 +18,4 @@ interface VisionIO {
     }
 
     fun updateInputs(inputs: VisionInputs) {}
-
-
 }
