@@ -17,6 +17,7 @@ import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2
 import frc.robot.subsystems.swerve.gyro.GyroIOSim
 import frc.robot.subsystems.swerve.module.SwerveModule
 import org.littletonrobotics.junction.Logger
+import org.photonvision.EstimatedRobotPose
 import java.util.function.BooleanSupplier
 import java.util.function.DoubleSupplier
 
@@ -156,6 +157,10 @@ class Drivetrain(
             desiredStates[index] = swerveModuleStates[index]
             module.apply(swerveModuleStates[index])
         }
+    }
+
+    fun addVisionMeasurement(pose: EstimatedRobotPose) {
+        poseEstimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds)
     }
 
     /**
