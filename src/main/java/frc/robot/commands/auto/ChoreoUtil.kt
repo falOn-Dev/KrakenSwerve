@@ -1,4 +1,4 @@
-package lib.auto
+package frc.robot.commands.auto
 
 import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
