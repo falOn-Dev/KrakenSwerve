@@ -1,3 +1,4 @@
+import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
 	id "java"
@@ -5,6 +6,7 @@ plugins {
 	id "edu.wpi.first.GradleRIO" version "2024.3.2"
 	id "idea"
 	id 'com.diffplug.spotless' version '6.20.0'
+	id 'org.jetbrains.dokka' version '1.9.20'
 }
 
 def javaVersion = JavaVersion.VERSION_17
@@ -178,3 +180,8 @@ task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 }
 compileJava.finalizedBy checkAkitInstall
+
+dokkaHtml {
+	suppressInheritedMembers = true
+	suppressObviousFunctions = true
+}
