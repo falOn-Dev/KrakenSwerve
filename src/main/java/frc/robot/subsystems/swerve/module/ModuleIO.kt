@@ -34,8 +34,8 @@ interface ModuleIO {
             table?.put("driveStatorCurrent", driveStatorCurrent)
             table?.put("driveSupplyCurrent", driveSupplyCurrent)
 
-            table?.put("turnPosition", turnPosition.degrees)
-            table?.put("absoluteTurnPosition", absoluteTurnPosition.degrees)
+            table?.put("turnPosition", Rotation2d.struct, turnPosition)
+            table?.put("absoluteTurnPosition", Rotation2d.struct, absoluteTurnPosition)
             table?.put("turnVelocityRadPerSec", turnVelocityRadPerSec)
             table?.put("turnSupplyVolts", turnSupplyVolts)
             table?.put("turnMotorVolts", turnMotorVolts)

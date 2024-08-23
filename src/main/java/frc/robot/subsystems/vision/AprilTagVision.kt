@@ -6,7 +6,7 @@ import frc.robot.Constants
 import org.littletonrobotics.junction.Logger
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
-import java.util.* 
+import java.util.*
 
 class AprilTagVision : SubsystemBase() {
     private val io: VisionIO = when(Constants.RobotConstants.mode){
