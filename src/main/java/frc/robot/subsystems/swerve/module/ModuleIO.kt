@@ -4,7 +4,18 @@ import edu.wpi.first.math.geometry.Rotation2d
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.inputs.LoggableInputs
 
+/**
+ * Swerve module IO interface
+ *
+ * This interface defines the methods that a swerve module must implement in order to be used in the swerve drive
+ */
 interface ModuleIO {
+
+    /**
+     * The inputs for the module
+     *
+     * This class is used to store the current state of the module's sensors and motors
+     */
     class ModuleInputs : LoggableInputs {
         var driveMotorConnected: Boolean = false
         var turnMotorConnected: Boolean = false
@@ -23,6 +34,8 @@ interface ModuleIO {
         var turnMotorVolts: Double = 0.0
         var turnStatorCurrent: Double = 0.0
         var turnSupplyCurrent: Double = 0.0
+
+        /** @suppress */
         override fun toLog(table: LogTable?) {
             table?.put("driveMotorConnected", driveMotorConnected)
             table?.put("turnMotorConnected", turnMotorConnected)
@@ -43,6 +56,7 @@ interface ModuleIO {
             table?.put("turnSupplyCurrent", turnSupplyCurrent)
         }
 
+        /** @suppress */
         override fun fromLog(table: LogTable?) {
             table?.get("driveMotorConnected")?.let { driveMotorConnected = it.boolean }
             table?.get("turnMotorConnected")?.let { turnMotorConnected = it.boolean }
@@ -64,17 +78,47 @@ interface ModuleIO {
         }
     }
 
+    /**
+     * Update the inputs using the current state of the module
+     * @param inputs The inputs to update (mutated in place)
+     */
     fun updateInputs(inputs: ModuleInputs) {}
 
+    /**
+     * Run the drive motor at a given voltage
+     *
+     * @param volts The voltage to run the motor at
+     */
     fun runDriveVolts(volts: Double) {}
 
+    /**
+     * Run the turn motor at a given voltage
+     *
+     * @param volts The voltage to run the motor at
+     */
     fun runTurnVolts(volts: Double) {}
 
+    /**
+     * Set the position setpoint for the turn motor
+     *
+     * @param positionRads The position to set the motor to in radians
+     */
     fun runTurnPositionSetpoint(positionRads: Double) {}
 
+    /**
+     * Set the velocity setpoint for the drive motor
+     *
+     * @param velocityRadPerSec The velocity to set the motor to in radians per second
+     */
     fun runDriveVelocitySetpoint(velocityRadPerSec: Double) {}
 
+    /**
+     * Stop the module
+     */
     fun stop() {}
 
+    /**
+     * Reset the module's position, for odometry purposes
+     */
     fun reset() {}
 }
