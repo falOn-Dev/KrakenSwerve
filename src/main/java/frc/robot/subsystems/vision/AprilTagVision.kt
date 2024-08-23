@@ -1,11 +1,15 @@
 package frc.robot.subsystems.vision
 
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
 import org.littletonrobotics.junction.Logger
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
 import java.util.*
+import java.util.function.Consumer
 
 class AprilTagVision : SubsystemBase() {
     private val io: VisionIO = when (Constants.RobotConstants.mode) {
@@ -23,6 +27,12 @@ class AprilTagVision : SubsystemBase() {
         PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
         Constants.VisionConstants.robotToCam,
     )
+
+    fun updateOdometryCommand(poseConsumer: Consumer<EstimatedRobotPose>): Command {
+        return this.run {
+            pose.ifPresent { poseConsumer.accept(it) }
+        }
+    }
 
     override fun periodic() {
         io.updateInputs(inputs)

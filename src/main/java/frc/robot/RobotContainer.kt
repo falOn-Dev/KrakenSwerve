@@ -62,6 +62,8 @@ object RobotContainer {
 //            )
 //        )
 
+        poseVision.defaultCommand = poseVision.updateOdometryCommand(drivetrain::addVisionMeasurement)
+
         drivetrain.defaultCommand = drivetrain.driveCommand(
             { -MathUtil.applyDeadband(driverController.leftY, 0.05) },
             { -MathUtil.applyDeadband(driverController.leftX, 0.05) },
