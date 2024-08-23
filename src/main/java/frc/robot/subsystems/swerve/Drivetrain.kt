@@ -159,6 +159,12 @@ class Drivetrain(
         }
     }
 
+    /**
+     * Method for adding a vision measurement to the pose estimator
+     * @see [EstimatedRobotPose]
+     *
+     * @param pose Vision measurement to add to the pose estimator
+     */
     fun addVisionMeasurement(pose: EstimatedRobotPose) {
         poseEstimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds)
     }
