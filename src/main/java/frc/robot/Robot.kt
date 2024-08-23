@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Autos
 import org.littletonrobotics.junction.LogFileUtil
+import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.LoggedRobot
 import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.networktables.NT4Publisher
@@ -91,6 +92,8 @@ object Robot : LoggedRobot() {
         SignalLogger.stop()
 
         CameraServer.startAutomaticCapture()
+
+        LogTable.disableProtobufWarning()
     }
 
     /**
