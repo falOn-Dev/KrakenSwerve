@@ -26,9 +26,9 @@ object Constants {
     object VisionConstants {
         val robotToCam: Transform3d = Transform3d(
             Translation3d(
-                Units.inchesToMeters(15.0),
+                Units.inchesToMeters(13.967415),
                 Units.inchesToMeters(0.0),
-                Units.inchesToMeters(2.5),
+                Units.inchesToMeters(5.070727 - 1.7),
             ),
             Rotation3d(0.0, Units.degreesToRadians(20.0), 0.0),
         )
