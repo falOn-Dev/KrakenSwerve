@@ -11,6 +11,8 @@ import org.photonvision.PhotonPoseEstimator
 import java.util.*
 import java.util.function.Consumer
 import java.util.function.Supplier
+import kotlin.jvm.optionals.getOrDefault
+import kotlin.jvm.optionals.getOrNull
 
 class AprilTagVision(poseSupplier: Supplier<Pose2d>) : SubsystemBase() {
     private val io: VisionIO = when (Constants.RobotConstants.mode) {
@@ -21,8 +23,7 @@ class AprilTagVision(poseSupplier: Supplier<Pose2d>) : SubsystemBase() {
 
     val inputs: VisionIO.VisionInputs = VisionIO.VisionInputs()
 
-    val pose: Optional<EstimatedRobotPose>
-        get() = estimator.update(inputs.latestResult)
+    var pose: EstimatedRobotPose? = null
 
     private val estimator: PhotonPoseEstimator = PhotonPoseEstimator(
         Constants.VisionConstants.aprilTagField,
@@ -32,15 +33,26 @@ class AprilTagVision(poseSupplier: Supplier<Pose2d>) : SubsystemBase() {
 
     fun updateOdometryCommand(poseConsumer: Consumer<EstimatedRobotPose>): Command {
         return this.run {
-            pose.ifPresent { poseConsumer.accept(it) }
+            if(pose != null) {
+                poseConsumer.accept(pose!!)
+            }
         }
     }
 
     override fun periodic() {
         io.updateInputs(inputs)
+
+        pose = estimator.update(inputs.latestResult).getOrNull()
+
         Logger.processInputs("vision/Pose Estimation", inputs)
 
-        pose.ifPresent { Logger.recordOutput("vision/Estimated Pose", pose.get().estimatedPose) }
+        if(pose != null) {
+            Logger.recordOutput("vision/Estimated Pose", Pose3d.struct, pose!!.estimatedPose)
+            Logger.recordOutput("vision/Pose Present", true)
+        } else {
+            Logger.recordOutput("vision/Pose Present", false)
+        }
+
         inputs.latestResult.targets.forEachIndexed { index, target ->
             Logger.recordOutput("vision/Target $index", target)
         }
