@@ -10,14 +10,14 @@ import org.photonvision.simulation.SimCameraProperties
 import org.photonvision.simulation.VisionSystemSim
 import java.util.function.Supplier
 
-class VisionIOSim(private val name: String, private val poseSupplier: Supplier<Pose2d>) : VisionIO {
+class VisionIOSim(private val name: String, private val poseSupplier: Supplier<Pose2d>, layout: AprilTagFieldLayout) : VisionIO {
     private val visionSim: VisionSystemSim = VisionSystemSim("visionSim")
     private val cam: PhotonCamera = PhotonCamera(name)
     private val camProp: SimCameraProperties = SimCameraProperties()
     private val camSim: PhotonCameraSim = PhotonCameraSim(cam, camProp)
 
     init {
-        visionSim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo))
+        visionSim.addAprilTags(layout)
         visionSim.addCamera(camSim, Constants.VisionConstants.robotToCam)
     }
 

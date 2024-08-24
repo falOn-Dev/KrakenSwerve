@@ -1,5 +1,7 @@
 package frc.robot.subsystems.vision
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout
+import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.wpilibj2.command.Command
@@ -8,6 +10,7 @@ import frc.robot.Constants
 import org.littletonrobotics.junction.Logger
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
+import org.photonvision.targeting.PhotonTrackedTarget
 import java.util.*
 import java.util.function.Consumer
 import java.util.function.Supplier
@@ -15,9 +18,11 @@ import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
 
 class AprilTagVision(poseSupplier: Supplier<Pose2d>) : SubsystemBase() {
+    private val layout: AprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo)
+
     private val io: VisionIO = when (Constants.RobotConstants.mode) {
         Constants.RobotConstants.Mode.REAL -> VisionIOReal("tags")
-        Constants.RobotConstants.Mode.SIM -> VisionIOSim("tags", poseSupplier)
+        Constants.RobotConstants.Mode.SIM -> VisionIOSim("tags", poseSupplier, layout)
         Constants.RobotConstants.Mode.REPLAY -> object : VisionIO {}
     }
 
@@ -53,8 +58,8 @@ class AprilTagVision(poseSupplier: Supplier<Pose2d>) : SubsystemBase() {
             Logger.recordOutput("vision/Pose Present", false)
         }
 
-        inputs.latestResult.targets.forEachIndexed { index, target ->
-            Logger.recordOutput("vision/Target $index", target)
-        }
+        val targets: Array<Pose3d> = inputs.latestResult.targets.map { layout.getTagPose(it.fiducialId).get() }.toTypedArray()
+
+        Logger.recordOutput("vision/Targets", Pose3d.struct, *targets)
     }
 }
