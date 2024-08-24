@@ -3,7 +3,8 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Mode": "String Chooser",
-      "/SmartDashboard/Scheduler": "Scheduler"
+      "/SmartDashboard/Scheduler": "Scheduler",
+      "/SmartDashboard/VisionSystemSim-visionSim/Sim Field": "Field2d"
     }
   },
   "NetworkTables": {
@@ -16,6 +17,12 @@
           "string[]##v_/SmartDashboard/Scheduler/Names": {
             "open": true
           }
+        },
+        "VisionSystemSim-visionSim": {
+          "Sim Field": {
+            "open": true
+          },
+          "open": true
         },
         "open": true
       }

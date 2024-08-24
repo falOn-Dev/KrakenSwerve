@@ -1,0 +1,39 @@
+{
+  "name": "Bounty",
+  "rotations": [
+    {
+      "axis": "y",
+      "degrees": 180
+    },
+    {
+      "axis": "z",
+      "degrees": -90
+    }
+  ],
+  "position": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "cameras": [
+    {
+      "name": "Limelight",
+      "rotations": [
+        {
+          "axis": "y",
+          "degrees": -20
+        }
+      ],
+      "position": [
+        0.339736,
+        0.0,
+        0.130902
+      ],
+      "resolution": [
+        320,
+        240
+      ],
+      "fov": "60"
+    }
+  ]
+}

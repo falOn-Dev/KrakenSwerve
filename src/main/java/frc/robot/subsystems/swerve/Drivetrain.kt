@@ -4,6 +4,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -189,15 +190,15 @@ class Drivetrain(
         return this.run {
             val speeds = if (isFieldOriented.asBoolean) {
                 ChassisSpeeds.fromFieldRelativeSpeeds(
-                    forwards.asDouble * 1.5,
-                    strafe.asDouble * 1.5,
+                    forwards.asDouble * TunerConstants.kSpeedAt12VoltsMps,
+                    strafe.asDouble * TunerConstants.kSpeedAt12VoltsMps,
                     rotation.asDouble * (Math.PI),
                     gyroInputs.yaw,
                 )
             } else {
                 ChassisSpeeds(
-                    forwards.asDouble * 1.5,
-                    strafe.asDouble * 1.5,
+                    forwards.asDouble * TunerConstants.kSpeedAt12VoltsMps,
+                    strafe.asDouble * TunerConstants.kSpeedAt12VoltsMps,
                     rotation.asDouble * (Math.PI),
                 )
             }
@@ -235,5 +236,7 @@ class Drivetrain(
         }
         Logger.recordOutput("swerve/measuredState", *measuredStates)
         Logger.recordOutput("swerve/desiredState", *desiredStates)
+
+        Logger.recordOutput("vision/Estimator Camera Pose", Pose3d.struct, Pose3d(pose).transformBy(Constants.VisionConstants.robotToCam))
     }
 }

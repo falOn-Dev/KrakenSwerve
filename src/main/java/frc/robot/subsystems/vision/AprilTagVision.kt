@@ -10,11 +10,13 @@ import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
 import java.util.*
 import java.util.function.Consumer
+import java.util.function.Supplier
 
-class AprilTagVision : SubsystemBase() {
+class AprilTagVision(poseSupplier: Supplier<Pose2d>) : SubsystemBase() {
     private val io: VisionIO = when (Constants.RobotConstants.mode) {
         Constants.RobotConstants.Mode.REAL -> VisionIOReal("tags")
-        else -> object : VisionIO {}
+        Constants.RobotConstants.Mode.SIM -> VisionIOSim("tags", poseSupplier)
+        Constants.RobotConstants.Mode.REPLAY -> object : VisionIO {}
     }
 
     val inputs: VisionIO.VisionInputs = VisionIO.VisionInputs()
@@ -38,7 +40,7 @@ class AprilTagVision : SubsystemBase() {
         io.updateInputs(inputs)
         Logger.processInputs("vision/Pose Estimation", inputs)
 
-        if (pose.isPresent) Logger.recordOutput("vision/Estimated Pose", pose.get().estimatedPose)
+        pose.ifPresent { Logger.recordOutput("vision/Estimated Pose", pose.get().estimatedPose) }
         inputs.latestResult.targets.forEachIndexed { index, target ->
             Logger.recordOutput("vision/Target $index", target)
         }

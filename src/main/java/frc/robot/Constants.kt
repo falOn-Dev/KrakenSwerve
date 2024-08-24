@@ -26,11 +26,11 @@ object Constants {
     object VisionConstants {
         val robotToCam: Transform3d = Transform3d(
             Translation3d(
-                Units.inchesToMeters(13.967415),
+                0.339736,
                 Units.inchesToMeters(0.0),
-                Units.inchesToMeters(5.070727 - 1.7),
+                0.130902
             ),
-            Rotation3d(0.0, Units.degreesToRadians(20.0), 0.0),
+            Rotation3d(0.0, Units.degreesToRadians(-20.0), 0.0),
         )
 
         val aprilTagField = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField()
