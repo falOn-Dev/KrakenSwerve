@@ -237,7 +237,13 @@ class Drivetrain(
                     gyroInputs.yaw,
                 )
             )
+
+            println("Pathfinding...")
         }.until { pose.x.near(target.x, 0.05) && pose.y.near(target.y, 0.05) && pose.rotation.near(target.rotation, 0.08) }
+    }
+
+    fun fakeNotePickup(): Command {
+        return this.run { applyChassisSpeeds(ChassisSpeeds(0.25, 0.0, 0.0)) }.withTimeout(2.0)
     }
 
     /**

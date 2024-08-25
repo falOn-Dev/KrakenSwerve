@@ -56,8 +56,10 @@ class ChoreoAuto(
 
             auto.addCommands(
                 getPath(path, isRed, swerve, parallel),
+                InstantCommand({swerve.target = swerve.pose}),
                 kotlin.collections.Map<Int, Supplier<Command>>::getOrDefault
                     .invoke(sequentialEventMap, index, Supplier { InstantCommand() }).get(),
+                swerve.driveToPose()
             )
         }
 

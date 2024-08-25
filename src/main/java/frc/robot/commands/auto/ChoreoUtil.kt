@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.robot.subsystems.swerve.Drivetrain
+import org.littletonrobotics.junction.Logger
 
 fun getPath(traj: ChoreoTrajectory, isRed: Boolean, drivebase: Drivetrain, parallel: Command = InstantCommand()): Command {
     return Choreo.choreoSwerveCommand(
@@ -17,5 +18,5 @@ fun getPath(traj: ChoreoTrajectory, isRed: Boolean, drivebase: Drivetrain, paral
         drivebase::applyChassisSpeeds,
         { isRed },
         drivebase,
-    ).alongWith(parallel)
+    ).alongWith(parallel, InstantCommand({ Logger.recordOutput("swerve/trajectory", *traj.poses) }))
 }

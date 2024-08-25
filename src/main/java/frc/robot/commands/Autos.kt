@@ -1,18 +1,24 @@
 package frc.robot.commands
 
-import com.choreo.lib.Choreo
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.PrintCommand
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
-import frc.robot.Constants
+import frc.robot.Robot
 import frc.robot.RobotContainer
-import frc.robot.commands.auto.getPath
+import frc.robot.commands.auto.ChoreoAuto
 import frc.robot.subsystems.ExampleSubsystem
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
+import java.util.function.Supplier
 
 object Autos {
+    private fun waitPrint(msg: String, wait: Double): Command {
+        return Commands.parallel(
+            Commands.print(msg),
+            Commands.waitSeconds(wait)
+        )
+    }
+
     private val autoModeChooser =
         SendableChooser<AutoMode>().apply {
             AutoMode.values().forEach { addOption(it.optionName, it) }
@@ -22,11 +28,11 @@ object Autos {
     private val loggedAutoChooser: LoggedDashboardChooser<AutoMode> =
         LoggedDashboardChooser("Auto Mode", autoModeChooser)
 
-    val defaultAutonomousCommand: Command
-        get() = AutoMode.default.command
+    val defaultAutonomousCommand: ChoreoAuto
+        get() = AutoMode.default.command.get()
 
-    val selectedAutonomousCommand: Command
-        get() = autoModeChooser.selected?.command ?: defaultAutonomousCommand
+    val selectedAutonomousCommand: ChoreoAuto
+        get() = autoModeChooser.selected.command.get() ?: defaultAutonomousCommand
 
     /** Example static factory for an autonomous command. */
     private fun exampleAuto(): Command =
@@ -34,15 +40,27 @@ object Autos {
 
     private fun exampleAuto2() = PrintCommand("An example Auto Mode that just prints a value")
 
-    private fun test3Note(): Command {
-        val paths = Choreo.getTrajectoryGroup("test_note_solution")
-
-        val group = SequentialCommandGroup()
-
-        group.addCommands(
-            getPath(paths[0], false, drivebase = RobotContainer.drivetrain),
-        )
-    }
+    val basic3note: ChoreoAuto = ChoreoAuto(
+        "test_note_solution",
+        RobotContainer.drivetrain,
+        sequentialEventMap = mapOf(
+            0 to Supplier {
+                RobotContainer.drivetrain.fakeNotePickup()
+            },
+            1 to Supplier {
+                RobotContainer.drivetrain.fakeNotePickup()
+            },
+            2 to Supplier {
+                RobotContainer.drivetrain.fakeNotePickup()
+            }
+        ),
+        parallelEventMap = mapOf(
+            0 to Supplier { PrintCommand("Picking Up Note 1") },
+            1 to Supplier { PrintCommand("Picking Up Note 2") },
+            2 to Supplier { PrintCommand("Picking Up Note 3") }
+        ),
+        startCommand = Supplier { waitPrint("Shooting Stored Note", 2.0) }
+    )
 
     /**
      * An enumeration of the available autonomous modes. It provides an easy way to manage all our
@@ -53,11 +71,9 @@ object Autos {
      * @param command The [Command] to run for this mode.
      */
     @Suppress("unused")
-    private enum class AutoMode(val optionName: String, val command: Command) {
+    private enum class AutoMode(val optionName: String, val command: Supplier<ChoreoAuto>) {
         // TODO: Replace with real auto modes and their corresponding commands
-        CUSTOM_AUTO_1("Custom Auto Mode 1", exampleAuto()),
-        CUSTOM_AUTO_2("Custom Auto Mode 2", exampleAuto2()),
-        CUSTOM_AUTO_3("Custom Auto Mode 3", ExampleCommand()),
+        CUSTOM_AUTO_1("Custom Auto Mode 1", { basic3note }),
         ;
 
         companion object {

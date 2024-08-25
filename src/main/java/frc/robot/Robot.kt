@@ -36,7 +36,6 @@ object Robot : LoggedRobot() {
      * The autonomous command to run. While a default value is set here, the [autonomousInit] method
      * will set it to the value selected in the AutoChooser on the dashboard.
      */
-    private var autonomousCommand: Command = Autos.defaultAutonomousCommand
 
     /**
      * This method is run when the robot is first started up and should be used for any initialization
@@ -121,8 +120,11 @@ object Robot : LoggedRobot() {
     override fun autonomousInit() {
         // We store the command as a Robot property in the rare event that the selector on the dashboard
         // is modified while the command is running since we need to access it again in teleopInit()
-        autonomousCommand = Autos.selectedAutonomousCommand
-        autonomousCommand.schedule()
+        Autos.selectedAutonomousCommand
+            .createCommand(
+                DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
+            )
+            .schedule()
     }
 
     /** This method is called periodically during autonomous. */
@@ -132,7 +134,7 @@ object Robot : LoggedRobot() {
         // This makes sure that the autonomous stops running when teleop starts running. If you want the
         // autonomous to continue until interrupted by another command, remove this line or comment it
         // out.
-        autonomousCommand.cancel()
+        Autos.selectedAutonomousCommand.cancel()
     }
 
     /** This method is called periodically during operator control. */
