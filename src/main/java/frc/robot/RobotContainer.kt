@@ -25,8 +25,8 @@ object RobotContainer {
 
     private val driverController: CommandXboxController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
 
-    private val drivetrain: Drivetrain = TunerConstants.drivetrain
-    private val poseVision: AprilTagVision = AprilTagVision(drivetrain::pose)
+    val drivetrain: Drivetrain = TunerConstants.drivetrain
+    val poseVision: AprilTagVision = AprilTagVision(drivetrain::pose)
 
 
     //    private val logger: SwerveLogger = SwerveLogger()

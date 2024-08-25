@@ -44,7 +44,7 @@ class Drivetrain(
 
     private val xTranslationPID: PIDController = PIDController(5.0, 0.0, 0.0)
     private val yTranslationPID: PIDController = PIDController(5.0, 0.0, 0.0)
-    private val rotationPID: PIDController = PIDController(2.0, 0.0, 0.01)
+    private val rotationPID: PIDController = PIDController(2.0, 0.0, 0.01).apply { enableContinuousInput(-Math.PI, Math.PI) }
 
     /**
      * Gyro IO for interacting with a gyroscope, automatically initializes between Real, Sim, and Replay (blank interface)
@@ -121,9 +121,6 @@ class Drivetrain(
     val pose: Pose2d
         get() = poseEstimator.estimatedPosition
 
-    init {
-        rotationPID.enableContinuousInput(-Math.PI, Math.PI)
-    }
 
     /**
      * Method for getting the module translations from the module constants

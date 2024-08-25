@@ -1,9 +1,14 @@
 package frc.robot.commands
 
+import com.choreo.lib.Choreo
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.PrintCommand
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
+import frc.robot.Constants
+import frc.robot.RobotContainer
+import frc.robot.commands.auto.getPath
 import frc.robot.subsystems.ExampleSubsystem
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 
@@ -29,6 +34,15 @@ object Autos {
 
     private fun exampleAuto2() = PrintCommand("An example Auto Mode that just prints a value")
 
+    private fun test3Note(): Command {
+        val paths = Choreo.getTrajectoryGroup("test_note_solution")
+
+        val group = SequentialCommandGroup()
+
+        group.addCommands(
+            getPath(paths[0], false, drivebase = RobotContainer.drivetrain),
+        )
+    }
 
     /**
      * An enumeration of the available autonomous modes. It provides an easy way to manage all our
