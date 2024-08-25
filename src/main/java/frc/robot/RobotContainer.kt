@@ -71,5 +71,8 @@ object RobotContainer {
         )
 
         driverController.rightBumper().onTrue(InstantCommand(drivetrain::resetHeading))
+
+        driverController.a().onTrue(InstantCommand({ drivetrain.target = drivetrain.pose }))
+        driverController.b().onTrue(drivetrain.driveToPose())
     }
 }

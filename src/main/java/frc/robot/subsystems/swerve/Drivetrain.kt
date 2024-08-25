@@ -2,25 +2,31 @@ package frc.robot.subsystems.swerve
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
 import frc.robot.subsystems.swerve.gyro.GyroIO
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2
 import frc.robot.subsystems.swerve.gyro.GyroIOSim
 import frc.robot.subsystems.swerve.module.SwerveModule
+import lib.near
 import org.littletonrobotics.junction.Logger
 import org.photonvision.EstimatedRobotPose
 import java.util.function.BooleanSupplier
 import java.util.function.DoubleSupplier
+import javax.xml.crypto.dsig.Transform
 
 /**
  * Drivetrain subsystem using Falon's custom swerve code
@@ -35,6 +41,10 @@ class Drivetrain(
     private val drivetrainConstants: SwerveDrivetrainConstants,
     vararg val moduleConstants: SwerveModuleConstants,
 ) : SubsystemBase() {
+
+    private val xTranslationPID: PIDController = PIDController(5.0, 0.0, 0.0)
+    private val yTranslationPID: PIDController = PIDController(5.0, 0.0, 0.0)
+    private val rotationPID: PIDController = PIDController(2.0, 0.0, 0.01)
 
     /**
      * Gyro IO for interacting with a gyroscope, automatically initializes between Real, Sim, and Replay (blank interface)
@@ -93,6 +103,8 @@ class Drivetrain(
      */
     private val kinematics: SwerveDriveKinematics = SwerveDriveKinematics(*getModuleTranslations())
 
+    var target: Pose2d = Pose2d()
+
     /**
      * Pose estimator used for calculating the robot's position on the field
      */
@@ -108,6 +120,10 @@ class Drivetrain(
      */
     val pose: Pose2d
         get() = poseEstimator.estimatedPosition
+
+    init {
+        rotationPID.enableContinuousInput(-Math.PI, Math.PI)
+    }
 
     /**
      * Method for getting the module translations from the module constants
@@ -207,6 +223,26 @@ class Drivetrain(
         }
     }
 
+    fun driveToPose(): Command {
+        return this.run {
+
+            val xOut = xTranslationPID.calculate(pose.x, target.x)
+            val yOut = yTranslationPID.calculate(pose.y, target.y)
+            val rotOut = rotationPID.calculate(pose.rotation.radians, target.rotation.radians)
+
+            println("X: $xOut, Y: $yOut, Rot: $rotOut")
+
+            applyChassisSpeeds(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    xOut,
+                    yOut,
+                    rotOut,
+                    gyroInputs.yaw,
+                )
+            )
+        }.until { pose.x.near(target.x, 0.05) && pose.y.near(target.y, 0.05) && pose.rotation.near(target.rotation, 0.08) }
+    }
+
     /**
      * Method for resetting the odometry of the robot
      *
@@ -230,11 +266,12 @@ class Drivetrain(
         }
         poseEstimator.update(gyroInputs.yaw, getModulePositions())
 
-        Logger.recordOutput("swerve/pose", poseEstimator.estimatedPosition)
+        Logger.recordOutput("swerve/pose", pose)
         modules.forEachIndexed { index, swerveModule ->
             measuredStates[index] = swerveModule.state
         }
         Logger.recordOutput("swerve/measuredState", *measuredStates)
+        Logger.recordOutput("swerve/targetPose", target)
         Logger.recordOutput("swerve/desiredState", *desiredStates)
 
         Logger.recordOutput("vision/Estimator Camera Pose", Pose3d.struct, Pose3d(pose).transformBy(Constants.VisionConstants.robotToCam))

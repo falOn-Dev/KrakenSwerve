@@ -29,6 +29,7 @@ object Autos {
 
     private fun exampleAuto2() = PrintCommand("An example Auto Mode that just prints a value")
 
+
     /**
      * An enumeration of the available autonomous modes. It provides an easy way to manage all our
      * autonomous modes. The [autoModeChooser] iterates over its values, adding each value to the
