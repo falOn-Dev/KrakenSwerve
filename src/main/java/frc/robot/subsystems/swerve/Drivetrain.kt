@@ -13,9 +13,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.units.Measure
+import edu.wpi.first.units.Units
+import edu.wpi.first.units.Voltage
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.Constants
 import frc.robot.subsystems.swerve.gyro.GyroIO
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2
@@ -105,6 +110,25 @@ class Drivetrain(
 
     var target: Pose2d = Pose2d()
 
+    private val driveSysID: SysIdRoutine = SysIdRoutine(
+        SysIdRoutine.Config(
+            null,
+            null,
+            null,
+            { state -> Logger.recordOutput("state", state.toString())}
+        ),
+        SysIdRoutine.Mechanism(
+            { volts: Measure<Voltage> ->
+                modules.forEach {
+                    it.pointAt(Rotation2d(0.0))
+                    it.applyVoltage(volts.`in`(Units.Volts))
+                }
+            },
+            null,
+            this
+        )
+    )
+
     /**
      * Pose estimator used for calculating the robot's position on the field
      */
@@ -166,6 +190,8 @@ class Drivetrain(
         val swerveModuleStates = kinematics.toSwerveModuleStates(discreteSpeeds)
 
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, TunerConstants.kSpeedAt12VoltsMps)
+
+        Logger.recordOutput("swerve/appliedSpeeds", speeds)
 
         modules.forEachIndexed { index, module ->
             desiredStates[index] = swerveModuleStates[index]
@@ -243,7 +269,8 @@ class Drivetrain(
     }
 
     fun fakeNotePickup(): Command {
-        return this.run { applyChassisSpeeds(ChassisSpeeds(0.25, 0.0, 0.0)) }.withTimeout(2.0)
+        return PrintCommand("Picking Up Note")
+//        return this.run { applyChassisSpeeds(ChassisSpeeds(0.25, 0.0, 0.0)) }.withTimeout(2.0)
     }
 
     /**

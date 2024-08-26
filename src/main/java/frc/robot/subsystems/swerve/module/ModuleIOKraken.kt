@@ -259,4 +259,54 @@ class ModuleIOKraken(
     override fun reset() {
         driveMotor.setPosition(0.0)
     }
+
+    /**
+     * Set the PID constants for a motor
+     *
+     * @param p The proportional constant
+     * @param i The integral constant
+     * @param d The derivative constant
+     * @param motor The motor to set the constants for
+     */
+    override fun setPID(p: Double, i: Double, d: Double, motor: ModuleIO.ModuleMotor) {
+        when(motor){
+            ModuleIO.ModuleMotor.DRIVE -> {
+                config.DriveMotorGains.kP = p
+                config.DriveMotorGains.kI = i
+                config.DriveMotorGains.kD = d
+                driveMotor.configurator.apply(config.DriveMotorGains)
+            }
+            ModuleIO.ModuleMotor.TURN -> {
+                config.SteerMotorGains.kP = p
+                config.SteerMotorGains.kI = i
+                config.SteerMotorGains.kD = d
+                turnMotor.configurator.apply(config.SteerMotorGains)
+            }
+        }
+    }
+
+    /**
+     * Set the feedforward constants for a motor
+     *
+     * @param kV The velocity feedforward constant
+     * @param kA The acceleration feedforward constant
+     * @param kS The static feedforward constant
+     * @param motor The motor to set the constants for
+     */
+    override fun setFF(kV: Double, kA: Double, kS: Double, motor: ModuleIO.ModuleMotor) {
+        when(motor){
+            ModuleIO.ModuleMotor.DRIVE -> {
+                config.DriveMotorGains.kV = kV
+                config.DriveMotorGains.kA = kA
+                config.DriveMotorGains.kS = kS
+                driveMotor.configurator.apply(config.DriveMotorGains)
+            }
+            ModuleIO.ModuleMotor.TURN -> {
+                config.SteerMotorGains.kV = kV
+                config.SteerMotorGains.kA = kA
+                config.SteerMotorGains.kS = kS
+                turnMotor.configurator.apply(config.SteerMotorGains)
+            }
+        }
+    }
 }

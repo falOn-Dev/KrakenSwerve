@@ -56,6 +56,14 @@ class SwerveModule(val config: SwerveModuleConstants) {
         io.runTurnPositionSetpoint(optimized.angle.radians)
     }
 
+    fun pointAt(angle: Rotation2d) {
+        io.runTurnPositionSetpoint(angle.radians)
+    }
+
+    fun applyVoltage(voltage: Double) {
+        io.runDriveVolts(voltage)
+    }
+
     fun updateInputs() {
         io.updateInputs(inputs)
     }

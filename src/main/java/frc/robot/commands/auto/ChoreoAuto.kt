@@ -2,6 +2,7 @@ package frc.robot.commands.auto
 
 import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
@@ -59,14 +60,14 @@ class ChoreoAuto(
                 InstantCommand({swerve.target = swerve.pose}),
                 kotlin.collections.Map<Int, Supplier<Command>>::getOrDefault
                     .invoke(sequentialEventMap, index, Supplier { InstantCommand() }).get(),
-                swerve.driveToPose()
+//                swerve.driveToPose()
             )
         }
 
         val autoCommand = Commands.waitSeconds(timeout).deadlineWith(auto)
 //        command = Optional.of(autoCommand)
         command = autoCommand
-        return autoCommand
+        return command!!
     }
 
     /**

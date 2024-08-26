@@ -34,6 +34,25 @@
         240
       ],
       "fov": "60"
+    },
+    {
+      "name": "Note Detector",
+      "rotations": [
+        {
+          "axis": "y",
+          "degrees": 20
+        }
+      ],
+      "position": [
+        0.339736,
+        0.0,
+        0.130902
+      ],
+      "resolution": [
+        320,
+        240
+      ],
+      "fov": "60"
     }
   ]
 }

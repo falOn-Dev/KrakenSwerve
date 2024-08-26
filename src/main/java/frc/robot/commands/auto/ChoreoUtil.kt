@@ -9,6 +9,9 @@ import frc.robot.subsystems.swerve.Drivetrain
 import org.littletonrobotics.junction.Logger
 
 fun getPath(traj: ChoreoTrajectory, isRed: Boolean, drivebase: Drivetrain, parallel: Command = InstantCommand()): Command {
+
+    val trajPoses = if(isRed) traj.flipped().poses else traj.poses
+
     return Choreo.choreoSwerveCommand(
         traj,
         drivebase::pose,
@@ -18,5 +21,5 @@ fun getPath(traj: ChoreoTrajectory, isRed: Boolean, drivebase: Drivetrain, paral
         drivebase::applyChassisSpeeds,
         { isRed },
         drivebase,
-    ).alongWith(parallel, InstantCommand({ Logger.recordOutput("swerve/trajectory", *traj.poses) }))
+    ).alongWith(parallel, InstantCommand({ Logger.recordOutput("swerve/trajectory", *trajPoses) }))
 }

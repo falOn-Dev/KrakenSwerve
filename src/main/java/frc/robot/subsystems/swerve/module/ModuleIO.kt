@@ -11,6 +11,10 @@ import org.littletonrobotics.junction.inputs.LoggableInputs
  */
 interface ModuleIO {
 
+    enum class ModuleMotor {
+        DRIVE, TURN
+    }
+
     /**
      * The inputs for the module
      *
@@ -121,4 +125,24 @@ interface ModuleIO {
      * Reset the module's position, for odometry purposes
      */
     fun reset() {}
+
+    /**
+     * Set the PID constants for a motor
+     *
+     * @param p The proportional constant
+     * @param i The integral constant
+     * @param d The derivative constant
+     * @param motor The motor to set the constants for
+     */
+    fun setPID(p: Double, i: Double, d: Double, motor: ModuleMotor) {}
+
+    /**
+     * Set the feedforward constants for a motor
+     *
+     * @param kV The velocity feedforward constant
+     * @param kA The acceleration feedforward constant
+     * @param kS The static feedforward constant
+     * @param motor The motor to set the constants for
+     */
+    fun setFF(kV: Double, kA: Double, kS: Double, motor: ModuleMotor) {}
 }

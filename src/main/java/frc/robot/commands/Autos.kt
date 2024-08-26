@@ -41,17 +41,17 @@ object Autos {
     private fun exampleAuto2() = PrintCommand("An example Auto Mode that just prints a value")
 
     val basic3note: ChoreoAuto = ChoreoAuto(
-        "test_note_solution",
+        "3NoteAuto",
         RobotContainer.drivetrain,
         sequentialEventMap = mapOf(
             0 to Supplier {
-                RobotContainer.drivetrain.fakeNotePickup()
+                waitPrint("Shoot Stored Note 1", 2.0)
             },
             1 to Supplier {
-                RobotContainer.drivetrain.fakeNotePickup()
+                waitPrint("Shoot Stored Note 2", 2.0)
             },
             2 to Supplier {
-                RobotContainer.drivetrain.fakeNotePickup()
+                waitPrint("Shoot Stored Note 3", 2.0)
             }
         ),
         parallelEventMap = mapOf(
