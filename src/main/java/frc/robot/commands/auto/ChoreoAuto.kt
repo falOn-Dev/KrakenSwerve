@@ -41,8 +41,8 @@ class ChoreoAuto(
      * @param isRed Whether the paths and initial pose need to be flipped or not
      */
     fun createCommand(isRed: Boolean): Command {
-        val auto: SequentialCommandGroup = SequentialCommandGroup()
-        auto.addCommands(startCommand.get())
+        val auto: SequentialCommandGroup = SequentialCommandGroup(InstantCommand({ swerve.visualizer.reset() }))
+
 
         if (shouldReset) {
             if (isRed) {
@@ -51,6 +51,9 @@ class ChoreoAuto(
                 auto.addCommands(InstantCommand({ swerve.resetOdometry(pathList.first().initialPose) }))
             }
         }
+
+        auto.addCommands(startCommand.get())
+
         pathList.forEachIndexed() { index, path ->
             val parallel: Command = kotlin.collections.Map<Int, Supplier<Command>>::getOrDefault
                 .invoke(parallelEventMap, index, Supplier { InstantCommand() }).get()
