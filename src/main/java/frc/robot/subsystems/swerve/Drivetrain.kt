@@ -26,6 +26,8 @@ import frc.robot.subsystems.swerve.gyro.GyroIO
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2
 import frc.robot.subsystems.swerve.gyro.GyroIOSim
 import frc.robot.subsystems.swerve.module.SwerveModule
+import lib.FRCGameField
+import lib.GamepieceVisualizer
 import lib.near
 import org.littletonrobotics.junction.Logger
 import org.photonvision.EstimatedRobotPose
@@ -109,6 +111,8 @@ class Drivetrain(
     private val kinematics: SwerveDriveKinematics = SwerveDriveKinematics(*getModuleTranslations())
 
     var target: Pose2d = Pose2d()
+
+    val visualizer: GamepieceVisualizer = GamepieceVisualizer(FRCGameField.CRESCENDO, { pose.transformBy(Transform2d(0.303, 0.0, Rotation2d())) }, { true })
 
     private val driveSysID: SysIdRoutine = SysIdRoutine(
         SysIdRoutine.Config(
@@ -305,5 +309,7 @@ class Drivetrain(
         Logger.recordOutput("swerve/desiredState", *desiredStates)
 
         Logger.recordOutput("vision/Estimator Camera Pose", Pose3d.struct, Pose3d(pose).transformBy(Constants.VisionConstants.robotToCam))
+
+        visualizer.update()
     }
 }
