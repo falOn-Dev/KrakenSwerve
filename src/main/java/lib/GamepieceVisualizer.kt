@@ -16,11 +16,10 @@ class GamepieceVisualizer(
     private val intakePoint: Supplier<Pose2d>,
     private val isIntaking: Supplier<Boolean>
 ) {
+    var shouldFlip = false
 
     private fun render() {
-        val isBlue = DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue
-
-        val displayable = field.pieces.filter{ it.second }.map { it.first }.toTypedArray()
+        val displayable = field.pieces.filter{ it.second }.map { if(shouldFlip) it.first.flip() else it.first }.toTypedArray()
 
         Logger.recordOutput("GamepieceVisualizer", *displayable)
     }
@@ -34,11 +33,11 @@ class GamepieceVisualizer(
     }
 
     fun update() {
-        val isBlue = DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue
+        shouldFlip = DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
 
         field.pieces.forEach { (pose, visible) ->
 
-            if(pose.toPose2d().translation.getDistance(intakePoint.get().translation) < field.gamepieceRadius && isIntaking.get()) {
+            if(pose.flip().toPose2d().translation.getDistance(intakePoint.get().translation) < field.gamepieceRadius && isIntaking.get()) {
                 setVisible(field.pieces.indexOf(Pair(pose, visible)), false)
             }
         }
