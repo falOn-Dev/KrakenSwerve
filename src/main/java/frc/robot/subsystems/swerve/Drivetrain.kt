@@ -17,7 +17,6 @@ import edu.wpi.first.units.Measure
 import edu.wpi.first.units.Units
 import edu.wpi.first.units.Voltage
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
@@ -33,7 +32,6 @@ import org.littletonrobotics.junction.Logger
 import org.photonvision.EstimatedRobotPose
 import java.util.function.BooleanSupplier
 import java.util.function.DoubleSupplier
-import javax.xml.crypto.dsig.Transform
 
 /**
  * Drivetrain subsystem using Falon's custom swerve code
@@ -51,7 +49,8 @@ class Drivetrain(
 
     private val xTranslationPID: PIDController = PIDController(5.0, 0.0, 0.0)
     private val yTranslationPID: PIDController = PIDController(5.0, 0.0, 0.0)
-    private val rotationPID: PIDController = PIDController(2.0, 0.0, 0.01).apply { enableContinuousInput(-Math.PI, Math.PI) }
+    private val rotationPID: PIDController =
+        PIDController(2.0, 0.0, 0.01).apply { enableContinuousInput(-Math.PI, Math.PI) }
 
     /**
      * Gyro IO for interacting with a gyroscope, automatically initializes between Real, Sim, and Replay (blank interface)
@@ -97,7 +96,10 @@ class Drivetrain(
      * Robot relative speeds of the robot, used for logging and gyro simulation
      */
     val robotRelativeSpeeds: ChassisSpeeds
-        get() = ChassisSpeeds.fromFieldRelativeSpeeds(kinematics.toChassisSpeeds(*measuredStates), gyroInputs.yaw.unaryMinus())
+        get() = ChassisSpeeds.fromFieldRelativeSpeeds(
+            kinematics.toChassisSpeeds(*measuredStates),
+            gyroInputs.yaw.unaryMinus()
+        )
 
     /**
      * Field relative speeds of the robot, used for logging and gyro simulation
@@ -112,14 +114,18 @@ class Drivetrain(
 
     var target: Pose2d = Pose2d()
 
-    val visualizer: GamepieceVisualizer = GamepieceVisualizer(FRCGameField.CRESCENDO, { pose.transformBy(Transform2d(0.303, 0.0, Rotation2d())) }, { true })
+    val visualizer: GamepieceVisualizer? =
+        if (Constants.RobotConstants.mode == Constants.RobotConstants.Mode.SIM) GamepieceVisualizer(
+            FRCGameField.CRESCENDO,
+            { pose.transformBy(Transform2d(0.303, 0.0, Rotation2d())) },
+            { true }) else null
 
     private val driveSysID: SysIdRoutine = SysIdRoutine(
         SysIdRoutine.Config(
             null,
             null,
             null,
-            { state -> Logger.recordOutput("state", state.toString())}
+            { state -> Logger.recordOutput("state", state.toString()) }
         ),
         SysIdRoutine.Mechanism(
             { volts: Measure<Voltage> ->
@@ -269,7 +275,12 @@ class Drivetrain(
             )
 
             println("Pathfinding...")
-        }.until { pose.x.near(target.x, 0.05) && pose.y.near(target.y, 0.05) && pose.rotation.near(target.rotation, 0.08) }
+        }.until {
+            pose.x.near(target.x, 0.05) && pose.y.near(target.y, 0.05) && pose.rotation.near(
+                target.rotation,
+                0.08
+            )
+        }
     }
 
     fun fakeNotePickup(): Command {
@@ -308,8 +319,14 @@ class Drivetrain(
         Logger.recordOutput("swerve/targetPose", target)
         Logger.recordOutput("swerve/desiredState", *desiredStates)
 
-        Logger.recordOutput("vision/Estimator Camera Pose", Pose3d.struct, Pose3d(pose).transformBy(Constants.VisionConstants.robotToCam))
+        Logger.recordOutput(
+            "vision/Estimator Camera Pose",
+            Pose3d.struct,
+            Pose3d(pose).transformBy(Constants.VisionConstants.robotToCam)
+        )
+    }
 
-        visualizer.update()
+    override fun simulationPeriodic() {
+        visualizer?.update()
     }
 }

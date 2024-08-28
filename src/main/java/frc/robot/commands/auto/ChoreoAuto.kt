@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
+import frc.robot.Constants
 import frc.robot.subsystems.swerve.Drivetrain
 import java.util.*
 import java.util.function.Supplier
@@ -41,7 +42,11 @@ class ChoreoAuto(
      * @param isRed Whether the paths and initial pose need to be flipped or not
      */
     fun createCommand(isRed: Boolean): Command {
-        val auto: SequentialCommandGroup = SequentialCommandGroup(InstantCommand({ swerve.visualizer.reset() }))
+        val auto: SequentialCommandGroup = SequentialCommandGroup()
+
+        if(Constants.RobotConstants.mode == Constants.RobotConstants.Mode.SIM) {
+            auto.addCommands(InstantCommand({ swerve.visualizer?.reset() }))
+        }
 
 
         if (shouldReset) {
