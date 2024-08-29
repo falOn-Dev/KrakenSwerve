@@ -16,11 +16,13 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.units.Measure
 import edu.wpi.first.units.Units
 import edu.wpi.first.units.Voltage
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.Constants
+import frc.robot.Robot
 import frc.robot.subsystems.swerve.gyro.GyroIO
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2
 import frc.robot.subsystems.swerve.gyro.GyroIOSim
@@ -51,6 +53,9 @@ class Drivetrain(
     private val yTranslationPID: PIDController = PIDController(5.0, 0.0, 0.0)
     private val rotationPID: PIDController =
         PIDController(2.0, 0.0, 0.01).apply { enableContinuousInput(-Math.PI, Math.PI) }
+
+    private var driverOrientation: Rotation2d = Rotation2d()
+    private var hasAppliedOffset: Boolean = false
 
     /**
      * Gyro IO for interacting with a gyroscope, automatically initializes between Real, Sim, and Replay (blank interface)
@@ -270,7 +275,7 @@ class Drivetrain(
                     xOut,
                     yOut,
                     rotOut,
-                    gyroInputs.yaw,
+                    gyroInputs.yaw.rotateBy(driverOrientation),
                 )
             )
 
@@ -311,19 +316,38 @@ class Drivetrain(
         }
         poseEstimator.update(gyroInputs.yaw, getModulePositions())
 
-        Logger.recordOutput("swerve/pose", pose)
+        Logger.recordOutput("swerve/pose", Pose2d.struct, pose)
         modules.forEachIndexed { index, swerveModule ->
             measuredStates[index] = swerveModule.state
         }
-        Logger.recordOutput("swerve/measuredState", *measuredStates)
-        Logger.recordOutput("swerve/targetPose", target)
-        Logger.recordOutput("swerve/desiredState", *desiredStates)
+        Logger.recordOutput("swerve/measuredState", SwerveModuleState.struct, *measuredStates)
+        Logger.recordOutput("swerve/targetPose", Pose2d.struct, target)
+        Logger.recordOutput("swerve/desiredState", SwerveModuleState.struct, *desiredStates)
 
         Logger.recordOutput(
             "vision/Estimator Camera Pose",
             Pose3d.struct,
             Pose3d(pose).transformBy(Constants.VisionConstants.robotToCam)
         )
+
+        if(hasAppliedOffset && Robot.isDisabled) {
+            hasAppliedOffset = false
+        }
+
+        Logger.recordOutput("swerve/driverOrientation", Rotation2d.struct, driverOrientation)
+
+        if(!hasAppliedOffset && Robot.isDisabled) {
+            val alliance = DriverStation.getAlliance()
+            if(alliance.isPresent){
+                driverOrientation = if(alliance.get() == DriverStation.Alliance.Blue) {
+                    Constants.SwerveConstants.blueDriverOrientation
+                } else {
+                    Constants.SwerveConstants.redDriverOrientation
+                }
+                hasAppliedOffset = true
+            }
+        }
+
     }
 
     override fun simulationPeriodic() {
