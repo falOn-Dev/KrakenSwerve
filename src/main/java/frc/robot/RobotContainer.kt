@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
+import frc.robot.commands.swerve.FollowMotion
 import frc.robot.subsystems.swerve.Drivetrain
 import frc.robot.subsystems.swerve.TunerConstants
 import frc.robot.subsystems.vision.AprilTagVision
@@ -74,5 +75,7 @@ object RobotContainer {
 
         driverController.a().onTrue(InstantCommand({ drivetrain.target = drivetrain.pose }))
         driverController.b().onTrue(drivetrain.driveToPose())
+
+        driverController.y().onTrue(FollowMotion("test_motion", drivetrain))
     }
 }

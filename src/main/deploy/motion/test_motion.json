@@ -1,0 +1,36 @@
+{
+  "commands": [
+    {
+      "direction": "north",
+      "value": 12
+    },
+    {
+      "direction": "east",
+      "value": 8
+    },
+    {
+      "direction": "clockwise",
+      "value": 90
+    },
+    {
+      "direction": "south",
+      "value": 4
+    },
+    {
+      "direction": "west",
+      "value": 6
+    },
+    {
+      "direction": "counterclockwise",
+      "value": 45
+    },
+    {
+      "direction": "north",
+      "value": 10
+    },
+    {
+      "direction": "clockwise",
+      "value": 180
+    }
+  ]
+}
