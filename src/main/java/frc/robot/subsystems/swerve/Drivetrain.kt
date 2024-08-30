@@ -247,7 +247,7 @@ class Drivetrain(
                     forwards.asDouble * TunerConstants.kSpeedAt12VoltsMps,
                     strafe.asDouble * TunerConstants.kSpeedAt12VoltsMps,
                     rotation.asDouble * (Math.PI),
-                    gyroInputs.yaw,
+                    gyroInputs.yaw.plus(driverOrientation),
                 )
             } else {
                 ChassisSpeeds(
@@ -275,7 +275,7 @@ class Drivetrain(
                     xOut,
                     yOut,
                     rotOut,
-                    gyroInputs.yaw.rotateBy(driverOrientation),
+                    gyroInputs.yaw,
                 )
             )
 
@@ -330,19 +330,15 @@ class Drivetrain(
             Pose3d(pose).transformBy(Constants.VisionConstants.robotToCam)
         )
 
-        if(hasAppliedOffset && Robot.isDisabled) {
-            hasAppliedOffset = false
-        }
 
         Logger.recordOutput("swerve/driverOrientation", Rotation2d.struct, driverOrientation)
 
-        if(!hasAppliedOffset && Robot.isDisabled) {
-            val alliance = DriverStation.getAlliance()
-            if(alliance.isPresent){
-                driverOrientation = if(alliance.get() == DriverStation.Alliance.Blue) {
-                    Constants.SwerveConstants.blueDriverOrientation
-                } else {
-                    Constants.SwerveConstants.redDriverOrientation
+        if(!hasAppliedOffset || Robot.isDisabled) {
+            DriverStation.getAlliance().ifPresent { alliance ->
+                driverOrientation = when(alliance) {
+                    DriverStation.Alliance.Red -> Rotation2d(0.0)
+                    DriverStation.Alliance.Blue -> Rotation2d(Math.PI)
+                    else -> Rotation2d(0.0)
                 }
                 hasAppliedOffset = true
             }
