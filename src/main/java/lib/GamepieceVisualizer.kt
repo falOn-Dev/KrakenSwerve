@@ -16,10 +16,10 @@ class GamepieceVisualizer(
     private val intakePoint: Supplier<Pose2d>,
     private val isIntaking: Supplier<Boolean>
 ) {
-    var shouldFlip = false
 
     private fun render() {
-        val displayable = field.pieces.filter{ it.second }.map { if(shouldFlip) it.first.flip() else it.first }.toTypedArray()
+        val displayable =
+            field.pieces.filter { it.second }.map { it.first }.toTypedArray()
 
         Logger.recordOutput("GamepieceVisualizer", *displayable)
     }
@@ -33,12 +33,8 @@ class GamepieceVisualizer(
     }
 
     fun update() {
-        shouldFlip = DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
-
         field.pieces.forEach { (pose, visible) ->
-            val usablePose = if(shouldFlip) pose.flip() else pose
-
-            if(usablePose.toPose2d().translation.getDistance(intakePoint.get().translation) < field.gamepieceRadius && isIntaking.get()) {
+            if (pose.toPose2d().translation.getDistance(intakePoint.get().translation) < field.gamepieceRadius && isIntaking.get()) {
                 setVisible(field.pieces.indexOf(Pair(pose, visible)), false)
             }
         }
@@ -61,6 +57,9 @@ enum class FRCGameField(val pieces: Array<Gamepiece>, val tags: AprilTagFieldLay
             Gamepiece(Pose3d(8.270526, 0.752816 + (1.6764 * 2), Units.inchesToMeters(1.0), Rotation3d()), true),
             Gamepiece(Pose3d(8.270526, 0.752816 + (1.6764 * 3), Units.inchesToMeters(1.0), Rotation3d()), true),
             Gamepiece(Pose3d(8.270526, 0.752816 + (1.6764 * 4), Units.inchesToMeters(1.0), Rotation3d()), true),
+            Gamepiece(Pose3d(2.895854, 4.105616, Units.inchesToMeters(1.0), Rotation3d()).flip(), true),
+            Gamepiece(Pose3d(2.895854, 4.105616 + 1.4478, Units.inchesToMeters(1.0), Rotation3d()).flip(), true),
+            Gamepiece(Pose3d(2.895855, 4.105616 + (1.4478 * 2), Units.inchesToMeters(1.0), Rotation3d()).flip(), true),
         ),
         AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo),
         Units.inchesToMeters(7.0)
