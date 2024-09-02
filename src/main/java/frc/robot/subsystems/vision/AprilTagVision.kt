@@ -5,8 +5,10 @@ import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
+import lib.near
 import org.littletonrobotics.junction.Logger
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
@@ -16,6 +18,7 @@ import java.util.function.Consumer
 import java.util.function.Supplier
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.abs
 
 class AprilTagVision(poseSupplier: Supplier<Pose2d>) : SubsystemBase() {
     private val layout: AprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo)
@@ -38,9 +41,13 @@ class AprilTagVision(poseSupplier: Supplier<Pose2d>) : SubsystemBase() {
 
     fun updateOdometryCommand(poseConsumer: Consumer<EstimatedRobotPose>): Command {
         return this.run {
-            if(pose != null) {
-                poseConsumer.accept(pose!!)
-            }
+            if(pose == null) return@run
+            if(pose!!.estimatedPose.translation.x < 0.0 || pose!!.estimatedPose.translation.x > layout.fieldLength) return@run
+            if(pose!!.estimatedPose.translation.y < 0.0 || pose!!.estimatedPose.translation.y > layout.fieldWidth) return@run
+            if(abs(pose!!.estimatedPose.translation.z) > 0.1) return@run
+
+            poseConsumer.accept(pose!!)
+            println("Updated Odometry")
         }
     }
 

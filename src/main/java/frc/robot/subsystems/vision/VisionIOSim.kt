@@ -13,7 +13,7 @@ import java.util.function.Supplier
 class VisionIOSim(private val name: String, private val poseSupplier: Supplier<Pose2d>, layout: AprilTagFieldLayout) : VisionIO {
     private val visionSim: VisionSystemSim = VisionSystemSim("visionSim")
     private val cam: PhotonCamera = PhotonCamera(name)
-    private val camProp: SimCameraProperties = SimCameraProperties()
+    private val camProp: SimCameraProperties = SimCameraProperties.LL2_640_480()
     private val camSim: PhotonCameraSim = PhotonCameraSim(cam, camProp)
 
     init {

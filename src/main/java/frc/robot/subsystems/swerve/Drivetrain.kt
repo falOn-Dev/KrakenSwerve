@@ -2,6 +2,7 @@ package frc.robot.subsystems.swerve
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants
+import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
@@ -344,6 +345,10 @@ class Drivetrain(
             }
         }
 
+    }
+
+    fun setVisionSTDDevs(xMeters: Double, yMeters: Double, rotRads: Double) {
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(xMeters, yMeters, rotRads))
     }
 
     override fun simulationPeriodic() {
