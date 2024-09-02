@@ -336,8 +336,8 @@ class Drivetrain(
         if(!hasAppliedOffset || Robot.isDisabled) {
             DriverStation.getAlliance().ifPresent { alliance ->
                 driverOrientation = when(alliance) {
-                    DriverStation.Alliance.Red -> Rotation2d(0.0)
-                    DriverStation.Alliance.Blue -> Rotation2d(Math.PI)
+                    DriverStation.Alliance.Red -> Rotation2d.fromDegrees(180.0)
+                    DriverStation.Alliance.Blue -> Rotation2d()
                     else -> Rotation2d(0.0)
                 }
                 hasAppliedOffset = true
