@@ -36,8 +36,9 @@ class GamepieceVisualizer(
         shouldFlip = DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
 
         field.pieces.forEach { (pose, visible) ->
+            val usablePose = if(shouldFlip) pose.flip() else pose
 
-            if(pose.flip().toPose2d().translation.getDistance(intakePoint.get().translation) < field.gamepieceRadius && isIntaking.get()) {
+            if(usablePose.toPose2d().translation.getDistance(intakePoint.get().translation) < field.gamepieceRadius && isIntaking.get()) {
                 setVisible(field.pieces.indexOf(Pair(pose, visible)), false)
             }
         }
