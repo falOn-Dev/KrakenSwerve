@@ -22,8 +22,6 @@ import edu.wpi.first.wpilibj.RobotBase
 object Constants {
     object SwerveConstants {
         const val CANBusName = "swerve"
-        val blueDriverOrientation: Rotation2d = Rotation2d.fromDegrees(0.0)
-        val redDriverOrientation: Rotation2d = Rotation2d.fromDegrees(180.0)
     }
 
     object VisionConstants {
