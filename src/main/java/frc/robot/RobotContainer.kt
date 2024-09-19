@@ -28,7 +28,6 @@ object RobotContainer {
     val drivetrain: Drivetrain = TunerConstants.drivetrain
     val poseVision: AprilTagVision = AprilTagVision(drivetrain::pose)
 
-
     //    private val logger: SwerveLogger = SwerveLogger()
 
     init {

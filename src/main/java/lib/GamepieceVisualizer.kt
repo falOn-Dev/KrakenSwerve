@@ -6,15 +6,13 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.util.Units
-import edu.wpi.first.wpilibj.DriverStation
 import org.littletonrobotics.junction.Logger
 import java.util.function.Supplier
-import kotlin.jvm.optionals.getOrDefault
 
 class GamepieceVisualizer(
     private val field: FRCGameField,
     private val intakePoint: Supplier<Pose2d>,
-    private val isIntaking: Supplier<Boolean>
+    private val isIntaking: Supplier<Boolean>,
 ) {
 
     private fun render() {
@@ -45,7 +43,6 @@ class GamepieceVisualizer(
 
 typealias Gamepiece = Pair<Pose3d, Boolean>
 
-
 enum class FRCGameField(val pieces: Array<Gamepiece>, val tags: AprilTagFieldLayout, val gamepieceRadius: Double) {
     CRESCENDO(
         arrayOf(
@@ -62,6 +59,6 @@ enum class FRCGameField(val pieces: Array<Gamepiece>, val tags: AprilTagFieldLay
             Gamepiece(Pose3d(2.895855, 4.105616 + (1.4478 * 2), Units.inchesToMeters(1.0), Rotation3d()).flip(), true),
         ),
         AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo),
-        Units.inchesToMeters(7.0)
-    )
+        Units.inchesToMeters(7.0),
+    ),
 }

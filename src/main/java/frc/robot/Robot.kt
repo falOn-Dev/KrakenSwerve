@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.WPILibVersion
-import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Autos
 import org.littletonrobotics.junction.LogFileUtil
@@ -122,7 +121,7 @@ object Robot : LoggedRobot() {
         // is modified while the command is running since we need to access it again in teleopInit()
         Autos.selectedAutonomousCommand
             .createCommand(
-                DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
+                DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red,
             )
             .schedule()
     }

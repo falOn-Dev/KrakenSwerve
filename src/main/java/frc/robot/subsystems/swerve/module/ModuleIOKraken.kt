@@ -35,8 +35,10 @@ class ModuleIOKraken(
 
     /** Drive motor, Kraken x60 w/ TalonFX */
     private val driveMotor: TalonFX = TalonFX(config.DriveMotorId, Constants.SwerveConstants.CANBusName)
+
     /** Turn motor, Kraken x60 w/ TalonFX */
     private val turnMotor: TalonFX = TalonFX(config.SteerMotorId, Constants.SwerveConstants.CANBusName)
+
     /** Turn motor's encoder, CANCoder magnetic encoder */
     private val turnEncoder: CANcoder = CANcoder(config.CANcoderId, Constants.SwerveConstants.CANBusName)
 
@@ -166,7 +168,6 @@ class ModuleIOKraken(
         }
     }
 
-
     /**
      * Update the inputs using the current state of the module
      * @param inputs The inputs to update (mutated in place)
@@ -269,7 +270,7 @@ class ModuleIOKraken(
      * @param motor The motor to set the constants for
      */
     override fun setPID(p: Double, i: Double, d: Double, motor: ModuleIO.ModuleMotor) {
-        when(motor){
+        when (motor) {
             ModuleIO.ModuleMotor.DRIVE -> {
                 config.DriveMotorGains.kP = p
                 config.DriveMotorGains.kI = i
@@ -294,7 +295,7 @@ class ModuleIOKraken(
      * @param motor The motor to set the constants for
      */
     override fun setFF(kV: Double, kA: Double, kS: Double, motor: ModuleIO.ModuleMotor) {
-        when(motor){
+        when (motor) {
             ModuleIO.ModuleMotor.DRIVE -> {
                 config.DriveMotorGains.kV = kV
                 config.DriveMotorGains.kA = kA

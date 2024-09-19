@@ -1,7 +1,6 @@
 package frc.robot.subsystems.vision
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout
-import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.geometry.Pose2d
 import frc.robot.Constants
 import org.photonvision.PhotonCamera

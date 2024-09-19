@@ -3,7 +3,6 @@ package frc.robot
 import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.VecBuilder
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.geometry.Translation3d
@@ -29,7 +28,7 @@ object Constants {
             Translation3d(
                 0.339736,
                 Units.inchesToMeters(0.0),
-                0.130902
+                0.130902,
             ),
             Rotation3d(0.0, Units.degreesToRadians(-20.0), 0.0),
         )

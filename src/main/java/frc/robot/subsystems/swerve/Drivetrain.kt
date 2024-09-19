@@ -104,7 +104,7 @@ class Drivetrain(
     val robotRelativeSpeeds: ChassisSpeeds
         get() = ChassisSpeeds.fromFieldRelativeSpeeds(
             kinematics.toChassisSpeeds(*measuredStates),
-            gyroInputs.yaw.unaryMinus()
+            gyroInputs.yaw.unaryMinus(),
         )
 
     /**
@@ -121,17 +121,22 @@ class Drivetrain(
     var target: Pose2d = Pose2d()
 
     val visualizer: GamepieceVisualizer? =
-        if (Constants.RobotConstants.mode == Constants.RobotConstants.Mode.SIM) GamepieceVisualizer(
-            FRCGameField.CRESCENDO,
-            { pose.transformBy(Transform2d(0.303, 0.0, Rotation2d())) },
-            { true }) else null
+        if (Constants.RobotConstants.mode == Constants.RobotConstants.Mode.SIM) {
+            GamepieceVisualizer(
+                FRCGameField.CRESCENDO,
+                { pose.transformBy(Transform2d(0.303, 0.0, Rotation2d())) },
+                { true },
+            )
+        } else {
+            null
+        }
 
     private val driveSysID: SysIdRoutine = SysIdRoutine(
         SysIdRoutine.Config(
             null,
             null,
             null,
-            { state -> Logger.recordOutput("state", state.toString()) }
+            { state -> Logger.recordOutput("state", state.toString()) },
         ),
         SysIdRoutine.Mechanism(
             { volts: Measure<Voltage> ->
@@ -141,8 +146,8 @@ class Drivetrain(
                 }
             },
             null,
-            this
-        )
+            this,
+        ),
     )
 
     /**
@@ -160,7 +165,6 @@ class Drivetrain(
      */
     val pose: Pose2d
         get() = poseEstimator.estimatedPosition
-
 
     /**
      * Method for getting the module translations from the module constants
@@ -264,7 +268,6 @@ class Drivetrain(
 
     fun driveToPose(): Command {
         return this.run {
-
             val xOut = xTranslationPID.calculate(pose.x, target.x)
             val yOut = yTranslationPID.calculate(pose.y, target.y)
             val rotOut = rotationPID.calculate(pose.rotation.radians, target.rotation.radians)
@@ -277,14 +280,14 @@ class Drivetrain(
                     yOut,
                     rotOut,
                     gyroInputs.yaw,
-                )
+                ),
             )
 
             println("Pathfinding...")
         }.until {
             pose.x.near(target.x, 0.05) && pose.y.near(target.y, 0.05) && pose.rotation.near(
                 target.rotation,
-                0.08
+                0.08,
             )
         }
     }
@@ -328,15 +331,14 @@ class Drivetrain(
         Logger.recordOutput(
             "vision/Estimator Camera Pose",
             Pose3d.struct,
-            Pose3d(pose).transformBy(Constants.VisionConstants.robotToCam)
+            Pose3d(pose).transformBy(Constants.VisionConstants.robotToCam),
         )
-
 
         Logger.recordOutput("swerve/driverOrientation", Rotation2d.struct, driverOrientation)
 
-        if(!hasAppliedOffset || Robot.isDisabled) {
+        if (!hasAppliedOffset || Robot.isDisabled) {
             DriverStation.getAlliance().ifPresent { alliance ->
-                driverOrientation = when(alliance) {
+                driverOrientation = when (alliance) {
                     DriverStation.Alliance.Red -> Rotation2d.fromDegrees(180.0)
                     DriverStation.Alliance.Blue -> Rotation2d()
                     else -> Rotation2d(0.0)
@@ -344,7 +346,6 @@ class Drivetrain(
                 hasAppliedOffset = true
             }
         }
-
     }
 
     fun setVisionSTDDevs(xMeters: Double, yMeters: Double, rotRads: Double) {

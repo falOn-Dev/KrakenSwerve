@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.PrintCommand
-import frc.robot.Robot
 import frc.robot.RobotContainer
 import frc.robot.commands.auto.ChoreoAuto
 import frc.robot.subsystems.ExampleSubsystem
@@ -15,7 +14,7 @@ object Autos {
     private fun waitPrint(msg: String, wait: Double): Command {
         return Commands.parallel(
             Commands.print(msg),
-            Commands.waitSeconds(wait)
+            Commands.waitSeconds(wait),
         )
     }
 
@@ -52,14 +51,14 @@ object Autos {
             },
             2 to Supplier {
                 waitPrint("Shoot Stored Note 3", 2.0)
-            }
+            },
         ),
         parallelEventMap = mapOf(
             0 to Supplier { PrintCommand("Picking Up Note 1") },
             1 to Supplier { PrintCommand("Picking Up Note 2") },
-            2 to Supplier { PrintCommand("Picking Up Note 3") }
+            2 to Supplier { PrintCommand("Picking Up Note 3") },
         ),
-        startCommand = Supplier { waitPrint("Shooting Stored Note", 2.0) }
+        startCommand = Supplier { waitPrint("Shooting Stored Note", 2.0) },
     )
 
     /**
