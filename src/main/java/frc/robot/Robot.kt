@@ -89,7 +89,7 @@ object Robot : LoggedRobot() {
         DriverStation.silenceJoystickConnectionWarning(true)
         SignalLogger.stop()
 
-        CameraServer.startAutomaticCapture()
+//        CameraServer.startAutomaticCapture()
 
         LogTable.disableProtobufWarning()
     }

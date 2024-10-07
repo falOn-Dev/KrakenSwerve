@@ -20,7 +20,7 @@ class AprilTagVision(poseSupplier: Supplier<Pose2d>) : SubsystemBase() {
     private val layout: AprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo)
 
     private val io: VisionIO = when (Constants.RobotConstants.mode) {
-        Constants.RobotConstants.Mode.REAL -> VisionIOReal("tags")
+        Constants.RobotConstants.Mode.REAL -> object : VisionIO {}
         Constants.RobotConstants.Mode.SIM -> VisionIOSim("tags", poseSupplier, layout)
         Constants.RobotConstants.Mode.REPLAY -> object : VisionIO {}
     }

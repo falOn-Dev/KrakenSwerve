@@ -18,6 +18,9 @@ import edu.wpi.first.units.Measure
 import edu.wpi.first.units.Units
 import edu.wpi.first.units.Voltage
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -57,6 +60,12 @@ class Drivetrain(
 
     private var driverOrientation: Rotation2d = Rotation2d()
     private var hasAppliedOffset: Boolean = false
+
+    var maxSpeedMPS = TunerConstants.kSpeedAt12VoltsMps
+
+    init {
+        SmartDashboard.putNumber("maxSpeedMPS", maxSpeedMPS)
+    }
 
     /**
      * Gyro IO for interacting with a gyroscope, automatically initializes between Real, Sim, and Replay (blank interface)
@@ -346,6 +355,8 @@ class Drivetrain(
                 hasAppliedOffset = true
             }
         }
+
+        if(Robot.isDisabled) maxSpeedMPS = SmartDashboard.getNumber("maxSpeedMPS", maxSpeedMPS)
     }
 
     fun setVisionSTDDevs(xMeters: Double, yMeters: Double, rotRads: Double) {

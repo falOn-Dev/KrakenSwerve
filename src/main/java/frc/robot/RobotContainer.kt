@@ -23,7 +23,8 @@ import frc.robot.subsystems.vision.AprilTagVision
  */
 object RobotContainer {
 
-    private val driverController: CommandXboxController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
+    private val driverController: CommandXboxController =
+        CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
 
     val drivetrain: Drivetrain = TunerConstants.drivetrain
     val poseVision: AprilTagVision = AprilTagVision(drivetrain::pose)
@@ -63,9 +64,9 @@ object RobotContainer {
         poseVision.defaultCommand = poseVision.updateOdometryCommand(drivetrain::addVisionMeasurement)
 
         drivetrain.defaultCommand = drivetrain.driveCommand(
-            { -MathUtil.applyDeadband(driverController.leftY, 0.05) },
-            { -MathUtil.applyDeadband(driverController.leftX, 0.05) },
-            { -MathUtil.applyDeadband(driverController.rightX, 0.05) },
+            { -MathUtil.applyDeadband(driverController.leftY, 0.05) * drivetrain.maxSpeedMPS },
+            { -MathUtil.applyDeadband(driverController.leftX, 0.05) * drivetrain.maxSpeedMPS },
+            { -MathUtil.applyDeadband(driverController.rightX, 0.05) * drivetrain.maxSpeedMPS },
             driverController.leftBumper().negate(),
         )
 
